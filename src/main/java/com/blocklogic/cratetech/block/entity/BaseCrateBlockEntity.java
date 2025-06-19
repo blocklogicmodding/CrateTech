@@ -44,7 +44,11 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     }
 
     private boolean isFilterOrUpgradeSlot(int slot) {
-        if (inventorySize == 59) {
+        if (inventorySize == 14) {
+            return slot >= 9;
+        } else if (inventorySize == 32) {
+            return slot >= 27;
+        } else if (inventorySize == 59) {
             return slot >= 54;
         } else if (inventorySize == 109) {
             return slot >= 104;
