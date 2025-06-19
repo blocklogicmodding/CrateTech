@@ -1,6 +1,10 @@
 package com.blocklogic.cratetech.block;
 
 import com.blocklogic.cratetech.CrateTech;
+import com.blocklogic.cratetech.block.custom.HugeCrateBlock;
+import com.blocklogic.cratetech.block.custom.LargeCrateBlock;
+import com.blocklogic.cratetech.block.custom.MediumCrateBlock;
+import com.blocklogic.cratetech.block.custom.SmallCrateBlock;
 import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -17,28 +21,28 @@ public class CTBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CrateTech.MODID);
 
     public static final DeferredBlock<Block> SMALL_CRATE = registerBlock("small_crate",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new SmallCrateBlock(BlockBehaviour.Properties.of()
                     .strength(3.0F)
                     .sound(SoundType.STONE)
                     .noOcclusion()
             ));
 
     public static final DeferredBlock<Block> MEDIUM_CRATE = registerBlock("medium_crate",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new MediumCrateBlock(BlockBehaviour.Properties.of()
                     .strength(3.0F)
                     .sound(SoundType.STONE)
                     .noOcclusion()
             ));
 
     public static final DeferredBlock<Block> LARGE_CRATE = registerBlock("large_crate",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new LargeCrateBlock(BlockBehaviour.Properties.of()
                     .strength(3.0F)
                     .sound(SoundType.STONE)
                     .noOcclusion()
             ));
 
     public static final DeferredBlock<Block> HUGE_CRATE = registerBlock("huge_crate",
-            () -> new Block(BlockBehaviour.Properties.of()
+            () -> new HugeCrateBlock(BlockBehaviour.Properties.of()
                     .strength(3.0F)
                     .sound(SoundType.STONE)
                     .noOcclusion()

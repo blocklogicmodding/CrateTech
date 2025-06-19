@@ -1,0 +1,129 @@
+package com.blocklogic.cratetech.screen.custom;
+
+import com.blocklogic.cratetech.item.CTItems;
+import com.blocklogic.cratetech.screen.CTMenuTypes;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
+
+public class HugeCrateMenu extends AbstractContainerMenu {
+    private final IItemHandler itemHandler;
+    private final int storageSlots = 104; // 13x8 = 104 slots
+    private static final int FILTER_SLOT = 104;
+    private static final int UPGRADE_SLOTS_START = 105;
+    private static final int UPGRADE_SLOTS_COUNT = 4;
+
+    public HugeCrateMenu(int containerId, Inventory playerInventory, IItemHandler itemHandler) {
+        super(CTMenuTypes.HUGE_CRATE_MENU.get(), containerId);
+        this.itemHandler = itemHandler;
+
+        int slotIndex = 0;
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 13; col++) {
+                this.addSlot(new SlotItemHandler(itemHandler, slotIndex++,
+                        8 + col * 18, 16 + row * 18));
+            }
+        }
+
+        this.addSlot(new SlotItemHandler(itemHandler, FILTER_SLOT, -26, 8) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return stack.getItem() == CTItems.ITEM_FILTER.get();
+            }
+
+            @Override
+            public int getMaxStackSize() {
+                return 1;
+            }
+        });
+
+        for (int i = 0; i < UPGRADE_SLOTS_COUNT; i++) {
+            this.addSlot(new SlotItemHandler(itemHandler, UPGRADE_SLOTS_START + i,
+                    -26, 45 + i * 18) {
+                @Override
+                public boolean mayPlace(ItemStack stack) {
+                    return stack.getItem() == CTItems.COLLECTOR_UPGRADE.get() ||
+                            stack.getItem() == CTItems.HOPPER_UPGRADE.get() ||
+                            stack.getItem() == CTItems.COMPACTING_UPGRADE.get() ||
+                            stack.getItem() == CTItems.SHULKER_UPGRADE.get();
+                }
+
+                @Override
+                public int getMaxStackSize() {
+                    return 1;
+                }
+            });
+        }
+
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9,
+                        44 + col * 18, 172 + row * 18));
+            }
+        }
+
+        for (int col = 0; col < 9; col++) {
+            this.addSlot(new Slot(playerInventory, col,
+                    44 + col * 18, 230));
+        }
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player player, int index) {
+        ItemStack itemstack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(index);
+
+        if (slot != null && slot.hasItem()) {
+            ItemStack slotStack = slot.getItem();
+            itemstack = slotStack.copy();
+
+            if (index < storageSlots) {
+                if (!this.moveItemStackTo(slotStack, storageSlots + 1 + UPGRADE_SLOTS_COUNT, this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (index == FILTER_SLOT) {
+                if (!this.moveItemStackTo(slotStack, storageSlots + 1 + UPGRADE_SLOTS_COUNT, this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (index >= UPGRADE_SLOTS_START && index < UPGRADE_SLOTS_START + UPGRADE_SLOTS_COUNT) {
+                if (!this.moveItemStackTo(slotStack, storageSlots + 1 + UPGRADE_SLOTS_COUNT, this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else {
+                if (slotStack.getItem() == CTItems.ITEM_FILTER.get()) {
+                    if (!this.moveItemStackTo(slotStack, FILTER_SLOT, FILTER_SLOT + 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (slotStack.getItem() == CTItems.COLLECTOR_UPGRADE.get() ||
+                        slotStack.getItem() == CTItems.HOPPER_UPGRADE.get() ||
+                        slotStack.getItem() == CTItems.COMPACTING_UPGRADE.get() ||
+                        slotStack.getItem() == CTItems.SHULKER_UPGRADE.get()) {
+                    if (!this.moveItemStackTo(slotStack, UPGRADE_SLOTS_START, UPGRADE_SLOTS_START + UPGRADE_SLOTS_COUNT, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else {
+                    if (!this.moveItemStackTo(slotStack, 0, storageSlots, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+            }
+
+            if (slotStack.isEmpty()) {
+                slot.setByPlayer(ItemStack.EMPTY);
+            } else {
+                slot.setChanged();
+            }
+        }
+
+        return itemstack;
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return true;
+    }
+}
