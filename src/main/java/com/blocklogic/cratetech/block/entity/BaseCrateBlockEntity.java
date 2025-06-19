@@ -1,14 +1,20 @@
 package com.blocklogic.cratetech.block.entity;
 
 import com.blocklogic.cratetech.component.CollectorSettings;
+import com.blocklogic.cratetech.component.CompactingSettings;
 import com.blocklogic.cratetech.component.HopperSettings;
 import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -16,7 +22,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -27,7 +38,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.*;
 
 public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuProvider {
     protected final ItemStackHandler itemHandler;
@@ -35,6 +46,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
     private CollectorSettings collectorSettings = CollectorSettings.DEFAULT;
     private HopperSettings hopperSettings = HopperSettings.DEFAULT;
+    private CompactingSettings compactingSettings = CompactingSettings.DEFAULT;
 
     public BaseCrateBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState, int size) {
         super(type, pos, blockState);
@@ -144,6 +156,34 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         setHopperSettings(HopperSettings.DEFAULT);
     }
 
+    public CompactingSettings getCompactingSettings() {
+        return compactingSettings;
+    }
+
+    public void setCompactingSettings(CompactingSettings settings) {
+        this.compactingSettings = settings;
+        setChanged();
+    }
+
+    public void updateCompactingFilter(List<Item> filterItems) {
+        CompactingSettings current = getCompactingSettings();
+        setCompactingSettings(current.withFilterItems(filterItems));
+    }
+
+    public void toggleCompactingWhitelistMode() {
+        CompactingSettings current = getCompactingSettings();
+        setCompactingSettings(current.withWhitelistMode(!current.whitelistMode()));
+    }
+
+    public void toggleCompacting3x3Mode() {
+        CompactingSettings current = getCompactingSettings();
+        setCompactingSettings(current.withUse3x3Recipes(!current.use3x3Recipes()));
+    }
+
+    public void resetCompactingSettings() {
+        setCompactingSettings(CompactingSettings.DEFAULT);
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -172,6 +212,20 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             hopperTag.putBoolean("push_mode", hopperSettings.pushMode());
             hopperTag.putBoolean("pull_mode", hopperSettings.pullMode());
             tag.put("hopper_settings", hopperTag);
+        }
+
+        if (!compactingSettings.equals(CompactingSettings.DEFAULT)) {
+            CompoundTag compactingTag = new CompoundTag();
+            ListTag filterItemsTag = new ListTag();
+            for (Item item : compactingSettings.filterItems()) {
+                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+                compactingTag.putString("item_" + filterItemsTag.size(), itemId.toString());
+                filterItemsTag.add(StringTag.valueOf(itemId.toString()));
+            }
+            compactingTag.put("filter_items", filterItemsTag);
+            compactingTag.putBoolean("whitelist_mode", compactingSettings.whitelistMode());
+            compactingTag.putBoolean("use_3x3_recipes", compactingSettings.use3x3Recipes());
+            tag.put("compacting_settings", compactingTag);
         }
     }
 
@@ -212,6 +266,32 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         } else {
             this.hopperSettings = HopperSettings.DEFAULT;
         }
+
+        if (tag.contains("compacting_settings")) {
+            CompoundTag compactingTag = tag.getCompound("compacting_settings");
+            List<Item> filterItems = new ArrayList<>();
+
+            if (compactingTag.contains("filter_items")) {
+                ListTag filterItemsTag = compactingTag.getList("filter_items", Tag.TAG_STRING);
+                for (int i = 0; i < filterItemsTag.size(); i++) {
+                    ResourceLocation itemId = ResourceLocation.tryParse(filterItemsTag.getString(i));
+                    if (itemId != null) {
+                        Item item = BuiltInRegistries.ITEM.get(itemId);
+                        if (item != null) {
+                            filterItems.add(item);
+                        }
+                    }
+                }
+            }
+
+            this.compactingSettings = new CompactingSettings(
+                    filterItems,
+                    compactingTag.getBoolean("whitelist_mode"),
+                    compactingTag.getBoolean("use_3x3_recipes")
+            );
+        } else {
+            this.compactingSettings = CompactingSettings.DEFAULT;
+        }
     }
 
     public void dropContents(Level level, BlockPos pos) {
@@ -251,6 +331,10 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (blockEntity.hasHopperUpgrade()) {
             blockEntity.performHopperOperations(level, pos);
         }
+
+        if (blockEntity.hasCompactingUpgrade()) {
+            blockEntity.performCompacting(level, pos);
+        }
     }
 
     private boolean hasCollectorUpgrade() {
@@ -269,6 +353,17 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         for (int i = 0; i < 4; i++) {
             ItemStack stack = itemHandler.getStackInSlot(upgradeSlotStart + i);
             if (!stack.isEmpty() && stack.getItem() == CTItems.HOPPER_UPGRADE.get()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasCompactingUpgrade() {
+        int upgradeSlotStart = getUpgradeSlotStart();
+        for (int i = 0; i < 4; i++) {
+            ItemStack stack = itemHandler.getStackInSlot(upgradeSlotStart + i);
+            if (!stack.isEmpty() && stack.getItem() == CTItems.COMPACTING_UPGRADE.get()) {
                 return true;
             }
         }
@@ -343,7 +438,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         return 0;
     }
 
-    // ===== HOPPER FUNCTIONALITY =====
     private void performHopperOperations(Level level, BlockPos pos) {
         if (level.getGameTime() % 8 != 0) {
             return;
@@ -486,5 +580,100 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (inventorySize == 59) return 54;
         if (inventorySize == 109) return 104;
         return 0;
+    }
+
+    private void performCompacting(Level level, BlockPos pos) {
+        if (level.getGameTime() % 40 != 0) {
+            return;
+        }
+
+        CompactingSettings settings = getCompactingSettings();
+        int storageSlots = getStorageSlotCount();
+
+        Map<Item, Integer> itemCounts = new HashMap<>();
+        Map<Item, List<Integer>> itemSlots = new HashMap<>();
+
+        for (int i = 0; i < storageSlots; i++) {
+            ItemStack stack = itemHandler.getStackInSlot(i);
+            if (!stack.isEmpty() && settings.shouldCompactItem(stack)) {
+                Item item = stack.getItem();
+                itemCounts.put(item, itemCounts.getOrDefault(item, 0) + stack.getCount());
+                itemSlots.computeIfAbsent(item, k -> new ArrayList<>()).add(i);
+            }
+        }
+
+        for (Map.Entry<Item, Integer> entry : itemCounts.entrySet()) {
+            Item item = entry.getKey();
+            int totalCount = entry.getValue();
+            List<Integer> slots = itemSlots.get(item);
+
+            if (settings.use3x3Recipes() && totalCount >= 9) {
+                ItemStack result = findCompactingRecipe(new ItemStack(item), 3);
+                if (!result.isEmpty()) {
+                    int craftsToMake = totalCount / 9;
+                    craftsToMake = Math.min(craftsToMake, 64 / result.getCount());
+
+                    if (tryInsertItems(result.copyWithCount(result.getCount() * craftsToMake))) {
+                        removeItemsFromSlots(slots, item, craftsToMake * 9);
+                        continue;
+                    }
+                }
+            }
+
+            if (totalCount >= 4) {
+                ItemStack result = findCompactingRecipe(new ItemStack(item), 2);
+                if (!result.isEmpty()) {
+                    int craftsToMake = totalCount / 4;
+                    craftsToMake = Math.min(craftsToMake, 64 / result.getCount());
+
+                    if (tryInsertItems(result.copyWithCount(result.getCount() * craftsToMake))) {
+                        removeItemsFromSlots(slots, item, craftsToMake * 4);
+                    }
+                }
+            }
+        }
+    }
+
+    private ItemStack findCompactingRecipe(ItemStack ingredient, int gridSize) {
+        if (level == null) return ItemStack.EMPTY;
+
+        ItemStack[] ingredients = new ItemStack[gridSize * gridSize];
+        for (int i = 0; i < ingredients.length; i++) {
+            ingredients[i] = ingredient.copy();
+            ingredients[i].setCount(1);
+        }
+
+        CraftingInput craftingInput = CraftingInput.of(gridSize, gridSize, Arrays.asList(ingredients));
+
+        Optional<RecipeHolder<CraftingRecipe>> recipeHolder = level.getRecipeManager()
+                .getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
+
+        if (recipeHolder.isPresent()) {
+            CraftingRecipe recipe = recipeHolder.get().value();
+            return recipe.assemble(craftingInput, level.registryAccess());
+        }
+
+        return ItemStack.EMPTY;
+    }
+
+    private boolean tryInsertItems(ItemStack stack) {
+        ItemStack remainder = insertItemIntoCrate(stack);
+        return remainder.isEmpty();
+    }
+
+    private void removeItemsFromSlots(List<Integer> slots, Item item, int totalToRemove) {
+        int remaining = totalToRemove;
+
+        for (int slotIndex : slots) {
+            if (remaining <= 0) break;
+
+            ItemStack stack = itemHandler.getStackInSlot(slotIndex);
+            if (!stack.isEmpty() && stack.getItem() == item) {
+                int toRemove = Math.min(remaining, stack.getCount());
+                stack.shrink(toRemove);
+                remaining -= toRemove;
+                setChanged();
+            }
+        }
     }
 }

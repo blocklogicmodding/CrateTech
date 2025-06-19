@@ -74,6 +74,36 @@ public class CTNetworkHandler {
                 SyncHopperSettingsPacket.STREAM_CODEC,
                 SyncHopperSettingsPacket::handle
         );
+
+        registrar.playToServer(
+                OpenCompactingUpgradePacket.TYPE,
+                OpenCompactingUpgradePacket.STREAM_CODEC,
+                OpenCompactingUpgradePacket::handle
+        );
+
+        registrar.playToServer(
+                CompactingFilterUpdatePacket.TYPE,
+                CompactingFilterUpdatePacket.STREAM_CODEC,
+                CompactingFilterUpdatePacket::handle
+        );
+
+        registrar.playToServer(
+                CompactingModeTogglePacket.TYPE,
+                CompactingModeTogglePacket.STREAM_CODEC,
+                CompactingModeTogglePacket::handle
+        );
+
+        registrar.playToServer(
+                CompactingResetPacket.TYPE,
+                CompactingResetPacket.STREAM_CODEC,
+                CompactingResetPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncCompactingSettingsPacket.TYPE,
+                SyncCompactingSettingsPacket.STREAM_CODEC,
+                SyncCompactingSettingsPacket::handle
+        );
     }
 
     public static void sendToServer(OpenCollectorUpgradePacket packet) {
@@ -117,6 +147,26 @@ public class CTNetworkHandler {
     }
 
     public static void sendToPlayer(ServerPlayer player, SyncHopperSettingsPacket packet) {
+        PacketDistributor.sendToPlayer(player, packet);
+    }
+
+    public static void sendToServer(OpenCompactingUpgradePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(CompactingFilterUpdatePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(CompactingModeTogglePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(CompactingResetPacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToPlayer(ServerPlayer player, SyncCompactingSettingsPacket packet) {
         PacketDistributor.sendToPlayer(player, packet);
     }
 }

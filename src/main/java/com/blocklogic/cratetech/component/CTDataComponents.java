@@ -26,6 +26,13 @@ public class CTDataComponents {
                             .networkSynchronized(HopperSettings.STREAM_CODEC)
                             .build());
 
+    public static final Supplier<DataComponentType<CompactingSettings>> COMPACTING_SETTINGS =
+            DATA_COMPONENT_TYPES.register("compacting_settings", () ->
+                    DataComponentType.<CompactingSettings>builder()
+                            .persistent(CompactingSettings.CODEC)
+                            .networkSynchronized(CompactingSettings.STREAM_CODEC)
+                            .build());
+
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT_TYPES.register(eventBus);
     }

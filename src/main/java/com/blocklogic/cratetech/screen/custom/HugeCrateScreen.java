@@ -4,6 +4,7 @@ import com.blocklogic.cratetech.CrateTech;
 import com.blocklogic.cratetech.item.CTItems;
 import com.blocklogic.cratetech.network.CTNetworkHandler;
 import com.blocklogic.cratetech.network.OpenCollectorUpgradePacket;
+import com.blocklogic.cratetech.network.OpenCompactingUpgradePacket;
 import com.blocklogic.cratetech.network.OpenHopperUpgradePacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -126,7 +127,7 @@ public class HugeCrateScreen extends AbstractContainerScreen<HugeCrateMenu> {
         }
 
         if (hasCompactingUpgrade() && isMouseOverButton(mouseX, mouseY, x + COMPACTING_BUTTON_X, y + COMPACTING_BUTTON_Y)) {
-            // TODO: Open compacting upgrade GUI
+            CTNetworkHandler.sendToServer(new OpenCompactingUpgradePacket(cratePos));
             return true;
         }
 
