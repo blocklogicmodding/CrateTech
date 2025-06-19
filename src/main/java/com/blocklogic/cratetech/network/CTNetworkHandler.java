@@ -44,6 +44,36 @@ public class CTNetworkHandler {
                 SyncCollectorSettingsPacket.STREAM_CODEC,
                 SyncCollectorSettingsPacket::handle
         );
+
+        registrar.playToServer(
+                OpenHopperUpgradePacket.TYPE,
+                OpenHopperUpgradePacket.STREAM_CODEC,
+                OpenHopperUpgradePacket::handle
+        );
+
+        registrar.playToServer(
+                HopperSideConfigPacket.TYPE,
+                HopperSideConfigPacket.STREAM_CODEC,
+                HopperSideConfigPacket::handle
+        );
+
+        registrar.playToServer(
+                HopperModeTogglePacket.TYPE,
+                HopperModeTogglePacket.STREAM_CODEC,
+                HopperModeTogglePacket::handle
+        );
+
+        registrar.playToServer(
+                HopperResetPacket.TYPE,
+                HopperResetPacket.STREAM_CODEC,
+                HopperResetPacket::handle
+        );
+
+        registrar.playToClient(
+                SyncHopperSettingsPacket.TYPE,
+                SyncHopperSettingsPacket.STREAM_CODEC,
+                SyncHopperSettingsPacket::handle
+        );
     }
 
     public static void sendToServer(OpenCollectorUpgradePacket packet) {
@@ -67,6 +97,26 @@ public class CTNetworkHandler {
     }
 
     public static void sendToPlayer(ServerPlayer player, SyncCollectorSettingsPacket packet) {
+        PacketDistributor.sendToPlayer(player, packet);
+    }
+
+    public static void sendToServer(OpenHopperUpgradePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(HopperSideConfigPacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(HopperModeTogglePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(HopperResetPacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToPlayer(ServerPlayer player, SyncHopperSettingsPacket packet) {
         PacketDistributor.sendToPlayer(player, packet);
     }
 }

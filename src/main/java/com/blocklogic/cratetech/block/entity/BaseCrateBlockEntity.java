@@ -1,8 +1,10 @@
 package com.blocklogic.cratetech.block.entity;
 
 import com.blocklogic.cratetech.component.CollectorSettings;
+import com.blocklogic.cratetech.component.HopperSettings;
 import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -20,6 +22,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +32,9 @@ import java.util.List;
 public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuProvider {
     protected final ItemStackHandler itemHandler;
     protected final int inventorySize;
+
+    private CollectorSettings collectorSettings = CollectorSettings.DEFAULT;
+    private HopperSettings hopperSettings = HopperSettings.DEFAULT;
 
     public BaseCrateBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState, int size) {
         super(type, pos, blockState);
@@ -60,8 +67,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         }
         return false;
     }
-
-    private CollectorSettings collectorSettings = CollectorSettings.DEFAULT;
 
     public CollectorSettings getCollectorSettings() {
         return collectorSettings;
@@ -97,6 +102,48 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         setCollectorSettings(current.withWireframe(!current.wireframeVisible()));
     }
 
+    public HopperSettings getHopperSettings() {
+        return hopperSettings;
+    }
+
+    public void setHopperSettings(HopperSettings settings) {
+        this.hopperSettings = settings;
+        setChanged();
+    }
+
+    public HopperSettings.SideMode getHopperSideMode(int direction) {
+        return getHopperSettings().getSideMode(direction);
+    }
+
+    public void toggleHopperSide(int direction) {
+        HopperSettings current = getHopperSettings();
+        HopperSettings.SideMode currentMode = current.getSideMode(direction);
+        HopperSettings.SideMode newMode = current.cycleSideMode(currentMode);
+        setHopperSettings(current.withSideMode(direction, newMode));
+    }
+
+    public void toggleHopperPushMode() {
+        HopperSettings current = getHopperSettings();
+        setHopperSettings(current.withPushMode(!current.pushMode()));
+    }
+
+    public void toggleHopperPullMode() {
+        HopperSettings current = getHopperSettings();
+        setHopperSettings(current.withPullMode(!current.pullMode()));
+    }
+
+    public boolean isHopperPushModeActive() {
+        return getHopperSettings().pushMode();
+    }
+
+    public boolean isHopperPullModeActive() {
+        return getHopperSettings().pullMode();
+    }
+
+    public void resetHopperSettings() {
+        setHopperSettings(HopperSettings.DEFAULT);
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -112,6 +159,19 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             collectorTag.putInt("east", collectorSettings.eastAdjustment());
             collectorTag.putBoolean("wireframe", collectorSettings.wireframeVisible());
             tag.put("collector_settings", collectorTag);
+        }
+
+        if (!hopperSettings.equals(HopperSettings.DEFAULT)) {
+            CompoundTag hopperTag = new CompoundTag();
+            hopperTag.putString("up", hopperSettings.up().name());
+            hopperTag.putString("down", hopperSettings.down().name());
+            hopperTag.putString("north", hopperSettings.north().name());
+            hopperTag.putString("south", hopperSettings.south().name());
+            hopperTag.putString("east", hopperSettings.east().name());
+            hopperTag.putString("west", hopperSettings.west().name());
+            hopperTag.putBoolean("push_mode", hopperSettings.pushMode());
+            hopperTag.putBoolean("pull_mode", hopperSettings.pullMode());
+            tag.put("hopper_settings", hopperTag);
         }
     }
 
@@ -135,6 +195,22 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             );
         } else {
             this.collectorSettings = CollectorSettings.DEFAULT;
+        }
+
+        if (tag.contains("hopper_settings")) {
+            CompoundTag hopperTag = tag.getCompound("hopper_settings");
+            this.hopperSettings = new HopperSettings(
+                    HopperSettings.SideMode.valueOf(hopperTag.getString("up").toUpperCase()),
+                    HopperSettings.SideMode.valueOf(hopperTag.getString("down").toUpperCase()),
+                    HopperSettings.SideMode.valueOf(hopperTag.getString("north").toUpperCase()),
+                    HopperSettings.SideMode.valueOf(hopperTag.getString("south").toUpperCase()),
+                    HopperSettings.SideMode.valueOf(hopperTag.getString("east").toUpperCase()),
+                    HopperSettings.SideMode.valueOf(hopperTag.getString("west").toUpperCase()),
+                    hopperTag.getBoolean("push_mode"),
+                    hopperTag.getBoolean("pull_mode")
+            );
+        } else {
+            this.hopperSettings = HopperSettings.DEFAULT;
         }
     }
 
@@ -171,6 +247,10 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (blockEntity.hasCollectorUpgrade()) {
             blockEntity.performCollection(level, pos);
         }
+
+        if (blockEntity.hasHopperUpgrade()) {
+            blockEntity.performHopperOperations(level, pos);
+        }
     }
 
     private boolean hasCollectorUpgrade() {
@@ -178,6 +258,17 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         for (int i = 0; i < 4; i++) {
             ItemStack stack = itemHandler.getStackInSlot(upgradeSlotStart + i);
             if (!stack.isEmpty() && stack.getItem() == CTItems.COLLECTOR_UPGRADE.get()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasHopperUpgrade() {
+        int upgradeSlotStart = getUpgradeSlotStart();
+        for (int i = 0; i < 4; i++) {
+            ItemStack stack = itemHandler.getStackInSlot(upgradeSlotStart + i);
+            if (!stack.isEmpty() && stack.getItem() == CTItems.HOPPER_UPGRADE.get()) {
                 return true;
             }
         }
@@ -240,6 +331,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             return true;
         }
 
+        // TODO: Implement filter logic when Item Filter functionality is added
         return true;
     }
 
@@ -249,6 +341,99 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (inventorySize == 59) return 54;
         if (inventorySize == 109) return 104;
         return 0;
+    }
+
+    // ===== HOPPER FUNCTIONALITY =====
+    private void performHopperOperations(Level level, BlockPos pos) {
+        if (level.getGameTime() % 8 != 0) {
+            return;
+        }
+
+        HopperSettings settings = getHopperSettings();
+
+        if (!settings.pushMode() && !settings.pullMode()) {
+            return;
+        }
+
+        for (Direction direction : Direction.values()) {
+            int dirIndex = switch (direction) {
+                case DOWN -> 0;
+                case UP -> 1;
+                case NORTH -> 2;
+                case SOUTH -> 3;
+                case WEST -> 4;
+                case EAST -> 5;
+            };
+
+            HopperSettings.SideMode sideMode = settings.getSideMode(dirIndex);
+
+            if (sideMode == HopperSettings.SideMode.DISABLED) {
+                continue;
+            }
+
+            BlockPos adjacentPos = pos.relative(direction);
+            BlockEntity adjacentEntity = level.getBlockEntity(adjacentPos);
+
+            if (adjacentEntity != null) {
+                IItemHandler adjacentHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjacentPos, direction.getOpposite());
+
+                if (adjacentHandler != null) {
+                    if (sideMode == HopperSettings.SideMode.PUSH && settings.pushMode()) {
+                        pushItemsToInventory(adjacentHandler);
+                    } else if (sideMode == HopperSettings.SideMode.PULL && settings.pullMode()) {
+                        pullItemsFromInventory(adjacentHandler);
+                    }
+                }
+            }
+        }
+    }
+
+    private void pushItemsToInventory(IItemHandler targetHandler) {
+        int storageSlots = getStorageSlotCount();
+
+        for (int i = 0; i < storageSlots; i++) {
+            ItemStack sourceStack = itemHandler.getStackInSlot(i);
+            if (sourceStack.isEmpty()) {
+                continue;
+            }
+
+            ItemStack transferStack = sourceStack.copy();
+            transferStack.setCount(1);
+
+            for (int j = 0; j < targetHandler.getSlots(); j++) {
+                ItemStack remainder = targetHandler.insertItem(j, transferStack, false);
+
+                if (remainder.isEmpty()) {
+                    itemHandler.extractItem(i, 1, false);
+                    setChanged();
+                    return;
+                }
+            }
+        }
+    }
+
+    private void pullItemsFromInventory(IItemHandler sourceHandler) {
+        int storageSlots = getStorageSlotCount();
+
+        for (int i = 0; i < sourceHandler.getSlots(); i++) {
+            ItemStack sourceStack = sourceHandler.getStackInSlot(i);
+            if (sourceStack.isEmpty()) {
+                continue;
+            }
+
+            ItemStack extractStack = sourceHandler.extractItem(i, 1, true);
+            if (extractStack.isEmpty()) {
+                continue;
+            }
+
+            ItemStack remainder = insertItemIntoCrate(extractStack);
+
+            if (remainder.isEmpty()) {
+                sourceHandler.extractItem(i, 1, false);
+                setChanged();
+                return;
+            }
+        }
     }
 
     private ItemStack insertItemIntoCrate(ItemStack itemStack) {
@@ -301,66 +486,5 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (inventorySize == 59) return 54;
         if (inventorySize == 109) return 104;
         return 0;
-    }
-
-    private static class ItemStackHandlerContainer implements net.minecraft.world.Container {
-        private final ItemStackHandler handler;
-
-        public ItemStackHandlerContainer(ItemStackHandler handler) {
-            this.handler = handler;
-        }
-
-        @Override
-        public int getContainerSize() {
-            return handler.getSlots();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                if (!handler.getStackInSlot(i).isEmpty()) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public ItemStack getItem(int slot) {
-            return handler.getStackInSlot(slot);
-        }
-
-        @Override
-        public ItemStack removeItem(int slot, int amount) {
-            return handler.extractItem(slot, amount, false);
-        }
-
-        @Override
-        public ItemStack removeItemNoUpdate(int slot) {
-            ItemStack stack = handler.getStackInSlot(slot).copy();
-            handler.setStackInSlot(slot, ItemStack.EMPTY);
-            return stack;
-        }
-
-        @Override
-        public void setItem(int slot, ItemStack stack) {
-            handler.setStackInSlot(slot, stack);
-        }
-
-        @Override
-        public void setChanged() {
-        }
-
-        @Override
-        public boolean stillValid(Player player) {
-            return true;
-        }
-
-        @Override
-        public void clearContent() {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                handler.setStackInSlot(i, ItemStack.EMPTY);
-            }
-        }
     }
 }

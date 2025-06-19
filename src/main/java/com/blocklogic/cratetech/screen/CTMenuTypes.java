@@ -78,6 +78,18 @@ public class CTMenuTypes {
                         throw new IllegalStateException("Block entity is not a BaseCrateBlockEntity!");
                     }));
 
+    public static final Supplier<MenuType<HopperUpgradeMenu>> HOPPER_UPGRADE_MENU =
+            MENUS.register("hopper_upgrade_menu", () ->
+                    IMenuTypeExtension.create((windowId, inv, data) -> {
+                        BlockPos pos = data.readBlockPos();
+                        Level level = inv.player.level();
+                        BlockEntity blockEntity = level.getBlockEntity(pos);
+                        if (blockEntity instanceof BaseCrateBlockEntity crateEntity) {
+                            return new HopperUpgradeMenu(windowId, inv, crateEntity);
+                        }
+                        throw new IllegalStateException("Block entity is not a BaseCrateBlockEntity!");
+                    }));
+
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);
     }

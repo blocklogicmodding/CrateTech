@@ -75,6 +75,7 @@ public class CrateTech {
             event.register(CTMenuTypes.HUGE_CRATE_MENU.get(), HugeCrateScreen::new);
 
             event.register(CTMenuTypes.COLLECTOR_UPGRADE_MENU.get(), CollectorUpgradeScreen::new);
+            event.register(CTMenuTypes.HOPPER_UPGRADE_MENU.get(), HopperUpgradeScreen::new);
         }
     }
 }

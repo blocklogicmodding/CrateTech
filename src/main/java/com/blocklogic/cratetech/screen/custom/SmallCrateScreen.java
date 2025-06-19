@@ -4,6 +4,7 @@ import com.blocklogic.cratetech.CrateTech;
 import com.blocklogic.cratetech.item.CTItems;
 import com.blocklogic.cratetech.network.CTNetworkHandler;
 import com.blocklogic.cratetech.network.OpenCollectorUpgradePacket;
+import com.blocklogic.cratetech.network.OpenHopperUpgradePacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.BlockPos;
@@ -119,7 +120,7 @@ public class SmallCrateScreen extends AbstractContainerScreen<SmallCrateMenu> {
         }
 
         if (hasHopperUpgrade() && isMouseOverButton(mouseX, mouseY, x + HOPPER_BUTTON_X, y + HOPPER_BUTTON_Y)) {
-            // TODO: Open hopper upgrade GUI
+            CTNetworkHandler.sendToServer(new OpenHopperUpgradePacket(cratePos));
             return true;
         }
 

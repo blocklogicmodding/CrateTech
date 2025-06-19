@@ -19,6 +19,13 @@ public class CTDataComponents {
                             .networkSynchronized(CollectorSettings.STREAM_CODEC)
                             .build());
 
+    public static final Supplier<DataComponentType<HopperSettings>> HOPPER_SETTINGS =
+            DATA_COMPONENT_TYPES.register("hopper_settings", () ->
+                    DataComponentType.<HopperSettings>builder()
+                            .persistent(HopperSettings.CODEC)
+                            .networkSynchronized(HopperSettings.STREAM_CODEC)
+                            .build());
+
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT_TYPES.register(eventBus);
     }
