@@ -2,6 +2,7 @@ package com.blocklogic.cratetech.screen.custom;
 
 import com.blocklogic.cratetech.item.CTItems;
 import com.blocklogic.cratetech.screen.CTMenuTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -17,9 +18,20 @@ public class LargeCrateMenu extends AbstractContainerMenu {
     private static final int UPGRADE_SLOTS_START = 55;
     private static final int UPGRADE_SLOTS_COUNT = 4;
 
+    private final BlockPos cratePos;
+
     public LargeCrateMenu(int containerId, Inventory playerInventory, IItemHandler itemHandler) {
+        this(containerId, playerInventory, itemHandler, BlockPos.ZERO);
+    }
+
+    public BlockPos getCratePos() {
+        return cratePos;
+    }
+
+    public LargeCrateMenu(int containerId, Inventory playerInventory, IItemHandler itemHandler, BlockPos cratePos) {
         super(CTMenuTypes.LARGE_CRATE_MENU.get(), containerId);
         this.itemHandler = itemHandler;
+        this.cratePos = cratePos;
 
         int slotIndex = 0;
         for (int row = 0; row < 6; row++) {

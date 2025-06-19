@@ -2,8 +2,10 @@ package com.blocklogic.cratetech;
 
 import com.blocklogic.cratetech.block.CTBlocks;
 import com.blocklogic.cratetech.block.entity.CTBlockEntities;
+import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.item.CTCreativeTab;
 import com.blocklogic.cratetech.item.CTItems;
+import com.blocklogic.cratetech.network.CTNetworkHandler;
 import com.blocklogic.cratetech.screen.CTMenuTypes;
 import com.blocklogic.cratetech.screen.custom.HugeCrateScreen;
 import com.blocklogic.cratetech.screen.custom.LargeCrateScreen;
@@ -42,6 +44,7 @@ public class CrateTech {
         CTBlocks.register(modEventBus);
         CTBlockEntities.register(modEventBus);
         CTMenuTypes.register(modEventBus);
+        CTDataComponents.register(modEventBus);
         CTCreativeTab.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);

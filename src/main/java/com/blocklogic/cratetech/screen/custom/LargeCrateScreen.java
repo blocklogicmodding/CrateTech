@@ -2,8 +2,11 @@ package com.blocklogic.cratetech.screen.custom;
 
 import com.blocklogic.cratetech.CrateTech;
 import com.blocklogic.cratetech.item.CTItems;
+import com.blocklogic.cratetech.network.CTNetworkHandler;
+import com.blocklogic.cratetech.network.OpenCollectorUpgradePacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,6 +17,8 @@ public class LargeCrateScreen extends AbstractContainerScreen<LargeCrateMenu> {
             ResourceLocation.fromNamespaceAndPath(CrateTech.MODID, "textures/gui/large_crate_gui.png");
     private static final ResourceLocation GUI_ELEMENTS =
             ResourceLocation.fromNamespaceAndPath(CrateTech.MODID, "textures/gui/gui_elements.png");
+
+    private final BlockPos cratePos;
 
     @Override
     protected void init() {
@@ -35,6 +40,7 @@ public class LargeCrateScreen extends AbstractContainerScreen<LargeCrateMenu> {
         this.imageHeight = 220;
         this.inventoryLabelY = this.imageHeight - 94;
         this.inventoryLabelX = 8;
+        this.cratePos = menu.getCratePos();
     }
 
     @Override
@@ -108,7 +114,8 @@ public class LargeCrateScreen extends AbstractContainerScreen<LargeCrateMenu> {
         int y = (this.height - this.imageHeight) / 2;
 
         if (hasCollectorUpgrade() && isMouseOverButton(mouseX, mouseY, x + COLLECTOR_BUTTON_X, y + COLLECTOR_BUTTON_Y)) {
-            // TODO: Open collector upgrade GUI
+            // Send packet to server to open collector upgrade menu
+            CTNetworkHandler.sendToServer(new OpenCollectorUpgradePacket(cratePos));
             return true;
         }
 

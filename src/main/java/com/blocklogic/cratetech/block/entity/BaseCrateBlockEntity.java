@@ -1,5 +1,7 @@
 package com.blocklogic.cratetech.block.entity;
 
+import com.blocklogic.cratetech.component.CTDataComponents;
+import com.blocklogic.cratetech.component.CollectorSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -56,10 +58,60 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         return false;
     }
 
+    // Collector Settings - stored as fields in the block entity
+    private CollectorSettings collectorSettings = CollectorSettings.DEFAULT;
+
+    public CollectorSettings getCollectorSettings() {
+        return collectorSettings;
+    }
+
+    public void setCollectorSettings(CollectorSettings settings) {
+        this.collectorSettings = settings;
+        setChanged();
+    }
+
+    public int getCollectionAdjustment(int direction) {
+        return getCollectorSettings().getAdjustment(direction);
+    }
+
+    public void adjustCollectionZone(int direction, int change) {
+        CollectorSettings current = getCollectorSettings();
+        int currentAdjustment = current.getAdjustment(direction);
+        int newAdjustment = Math.max(-6, Math.min(9, currentAdjustment + change));
+        setCollectorSettings(current.withAdjustment(direction, newAdjustment));
+    }
+
+    public void resetCollectionZone() {
+        CollectorSettings current = getCollectorSettings();
+        setCollectorSettings(current.reset());
+    }
+
+    public boolean isWireframeVisible() {
+        return getCollectorSettings().wireframeVisible();
+    }
+
+    public void toggleWireframe() {
+        CollectorSettings current = getCollectorSettings();
+        setCollectorSettings(current.withWireframe(!current.wireframeVisible()));
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put("inventory", itemHandler.serializeNBT(registries));
+
+        // Save collector settings
+        if (!collectorSettings.equals(CollectorSettings.DEFAULT)) {
+            CompoundTag collectorTag = new CompoundTag();
+            collectorTag.putInt("down", collectorSettings.downAdjustment());
+            collectorTag.putInt("up", collectorSettings.upAdjustment());
+            collectorTag.putInt("north", collectorSettings.northAdjustment());
+            collectorTag.putInt("south", collectorSettings.southAdjustment());
+            collectorTag.putInt("west", collectorSettings.westAdjustment());
+            collectorTag.putInt("east", collectorSettings.eastAdjustment());
+            collectorTag.putBoolean("wireframe", collectorSettings.wireframeVisible());
+            tag.put("collector_settings", collectorTag);
+        }
     }
 
     @Override
@@ -67,6 +119,22 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         super.loadAdditional(tag, registries);
         if (tag.contains("inventory")) {
             itemHandler.deserializeNBT(registries, tag.getCompound("inventory"));
+        }
+
+        // Load collector settings
+        if (tag.contains("collector_settings")) {
+            CompoundTag collectorTag = tag.getCompound("collector_settings");
+            this.collectorSettings = new CollectorSettings(
+                    collectorTag.getInt("down"),
+                    collectorTag.getInt("up"),
+                    collectorTag.getInt("north"),
+                    collectorTag.getInt("south"),
+                    collectorTag.getInt("west"),
+                    collectorTag.getInt("east"),
+                    collectorTag.getBoolean("wireframe")
+            );
+        } else {
+            this.collectorSettings = CollectorSettings.DEFAULT;
         }
     }
 
@@ -101,6 +169,11 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     public static void serverTick(Level level, BlockPos pos, BlockState state, BaseCrateBlockEntity blockEntity) {
         // TODO: Add upgrade module processing here
         // This will handle collector upgrades, hopper upgrades, compacting upgrades, etc.
+
+        // Example collector logic:
+        // if (blockEntity.hasCollectorUpgrade()) {
+        //     blockEntity.performCollection(level, pos);
+        // }
     }
 
     private static class ItemStackHandlerContainer implements net.minecraft.world.Container {

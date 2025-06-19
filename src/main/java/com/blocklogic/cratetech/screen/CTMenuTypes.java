@@ -1,14 +1,8 @@
 package com.blocklogic.cratetech.screen;
 
 import com.blocklogic.cratetech.CrateTech;
-import com.blocklogic.cratetech.block.entity.HugeCrateBlockEntity;
-import com.blocklogic.cratetech.block.entity.LargeCrateBlockEntity;
-import com.blocklogic.cratetech.block.entity.MediumCrateBlockEntity;
-import com.blocklogic.cratetech.block.entity.SmallCrateBlockEntity;
-import com.blocklogic.cratetech.screen.custom.HugeCrateMenu;
-import com.blocklogic.cratetech.screen.custom.LargeCrateMenu;
-import com.blocklogic.cratetech.screen.custom.MediumCrateMenu;
-import com.blocklogic.cratetech.screen.custom.SmallCrateMenu;
+import com.blocklogic.cratetech.block.entity.*;
+import com.blocklogic.cratetech.screen.custom.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -70,6 +64,18 @@ public class CTMenuTypes {
                             return new HugeCrateMenu(windowId, inv, hugeCrate.getItemHandler());
                         }
                         throw new IllegalStateException("Block entity is not a HugeCrateBlockEntity!");
+                    }));
+
+    public static final Supplier<MenuType<CollectorUpgradeMenu>> COLLECTOR_UPGRADE_MENU =
+            MENUS.register("collector_upgrade_menu", () ->
+                    IMenuTypeExtension.create((windowId, inv, data) -> {
+                        BlockPos pos = data.readBlockPos();
+                        Level level = inv.player.level();
+                        BlockEntity blockEntity = level.getBlockEntity(pos);
+                        if (blockEntity instanceof BaseCrateBlockEntity crateEntity) {
+                            return new CollectorUpgradeMenu(windowId, inv, crateEntity);
+                        }
+                        throw new IllegalStateException("Block entity is not a BaseCrateBlockEntity!");
                     }));
 
     public static void register(IEventBus eventBus) {
