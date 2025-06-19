@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": {
+      "item": "minecraft:hopper"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "U": {
+      "item": "cratetech:upgrade_base"
+    }
+  },
+  "pattern": [
+    "HI ",
+    "IU ",
+    "   "
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:hopper_upgrade"
+  }
+}

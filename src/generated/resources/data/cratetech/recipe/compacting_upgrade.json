@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:crafting_table"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "U": {
+      "item": "cratetech:upgrade_base"
+    }
+  },
+  "pattern": [
+    "PB ",
+    "BU ",
+    "   "
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:compacting_upgrade"
+  }
+}

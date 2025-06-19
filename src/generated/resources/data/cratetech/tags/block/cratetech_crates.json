@@ -1,0 +1,8 @@
+{
+  "values": [
+    "cratetech:small_crate",
+    "cratetech:medium_crate",
+    "cratetech:large_crate",
+    "cratetech:huge_crate"
+  ]
+}

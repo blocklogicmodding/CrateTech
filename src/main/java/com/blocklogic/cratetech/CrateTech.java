@@ -1,5 +1,8 @@
 package com.blocklogic.cratetech;
 
+import com.blocklogic.cratetech.block.CTBlocks;
+import com.blocklogic.cratetech.item.CTCreativeTab;
+import com.blocklogic.cratetech.item.CTItems;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,6 +30,10 @@ public class CrateTech {
         modEventBus.addListener(this::commonSetup);
 
         NeoForge.EVENT_BUS.register(this);
+
+        CTItems.register(modEventBus);
+        CTBlocks.register(modEventBus);
+        CTCreativeTab.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);
 

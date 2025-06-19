@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "cratetech:large_crate"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "PDP",
+    "PCP",
+    "PDP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:huge_crate"
+  }
+}

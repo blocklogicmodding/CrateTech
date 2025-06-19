@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "tag": "c:chests"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "S": {
+      "item": "minecraft:shulker_shell"
+    },
+    "U": {
+      "item": "cratetech:upgrade_base"
+    }
+  },
+  "pattern": [
+    "SE ",
+    "CU ",
+    "   "
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:shulker_upgrade"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "U": {
+      "item": "cratetech:upgrade_base"
+    },
+    "Y": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "pattern": [
+    "ER ",
+    "YU ",
+    "   "
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:collector_upgrade"
+  }
+}

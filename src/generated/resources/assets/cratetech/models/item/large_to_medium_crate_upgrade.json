@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "cratetech:item/large_to_medium_crate_upgrade"
+  }
+}

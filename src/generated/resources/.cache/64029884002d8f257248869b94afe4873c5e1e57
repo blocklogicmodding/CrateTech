@@ -1,0 +1,10 @@
+// 1.21.1	2025-06-19T17:59:30.9537978	Item Models: cratetech
+2c78dbb5eaaa6d7be2a46c5046e67ec069eecb40 assets/cratetech/models/item/collector_upgrade.json
+3ab2c03458374cec839b2f3264acadd8ef62c199 assets/cratetech/models/item/compacting_upgrade.json
+95c4eb3bd44a72880ab2d967ed7cb5b074b9c18e assets/cratetech/models/item/hopper_upgrade.json
+ec6bed01f8c21b76a00b8a89ca17e1f051b2116d assets/cratetech/models/item/item_filter.json
+39bda5caceb309db6dc284dc338a8caa825aab85 assets/cratetech/models/item/large_to_medium_crate_upgrade.json
+6d1e46b2ca89879e43da9fcabdcdf2a7ddc4f427 assets/cratetech/models/item/medium_to_large_crate_upgrade.json
+70a0608f6f58ad059e2c88e42e62c59b69028cbb assets/cratetech/models/item/shulker_upgrade.json
+bdeaa9768a734fcb1ad6cd9a5adda29bbf8dd2d4 assets/cratetech/models/item/small_to_medium_crate_upgrade.json
+6a1255455a66aa774de290287abe1b6bdbd1fdd4 assets/cratetech/models/item/upgrade_base.json

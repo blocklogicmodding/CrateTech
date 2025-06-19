@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_medium_crate": {
+      "conditions": {
+        "items": [
+          {
+            "items": "cratetech:medium_crate"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "cratetech:medium_to_large_crate_upgrade"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_medium_crate"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cratetech:medium_to_large_crate_upgrade"
+    ]
+  }
+}

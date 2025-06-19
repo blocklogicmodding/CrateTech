@@ -1,3 +1,18 @@
 {
+  "cratetech.cratetech.cratetech_creative_tab": "CrateTech",
 
+  "block.cratetech.small_crate": "Small Crate",
+  "block.cratetech.medium_crate": "Medium Crate",
+  "block.cratetech.large_crate": "Large Crate",
+  "block.cratetech.huge_crate": "Huge Crate",
+
+  "item.cratetech.collector_upgrade": "Collector Upgrade",
+  "item.cratetech.compacting_upgrade": "Compacting Upgrade",
+  "item.cratetech.hopper_upgrade": "Hopper Upgrade",
+  "item.cratetech.shulker_upgrade": "Shulker Upgrade",
+  "item.cratetech.upgrade_base": "Upgrade Base",
+  "item.cratetech.item_filter": "Item Filter",
+  "item.cratetech.small_to_medium_crate_upgrade": "Small to Medium Crate Upgrade",
+  "item.cratetech.medium_to_large_crate_upgrade": "Medium to Large Crate Upgrade",
+  "item.cratetech.large_to_medium_crate_upgrade": "Large to Huge Crate Upgrade"
 }

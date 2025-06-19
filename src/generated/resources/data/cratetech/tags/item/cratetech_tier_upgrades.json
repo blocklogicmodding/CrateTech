@@ -1,0 +1,7 @@
+{
+  "values": [
+    "cratetech:small_to_medium_crate_upgrade",
+    "cratetech:medium_to_large_crate_upgrade",
+    "cratetech:large_to_medium_crate_upgrade"
+  ]
+}

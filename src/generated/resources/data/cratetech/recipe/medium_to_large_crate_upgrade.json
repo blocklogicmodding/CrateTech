@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "cratetech:medium_crate"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "PGP",
+    "PCP",
+    "PGP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:medium_to_large_crate_upgrade"
+  }
+}

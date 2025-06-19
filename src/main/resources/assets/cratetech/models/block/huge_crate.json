@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "north": "cratetech:block/huge_crate_side",
+    "south": "cratetech:block/huge_crate_side",
+    "east": "cratetech:block/huge_crate_side",
+    "west": "cratetech:block/huge_crate_side",
+    "up": "cratetech:block/crate_top",
+    "down": "cratetech:block/crate_bottom",
+    "particle": "cratetech:block/huge_crate_side"
+  }
+}

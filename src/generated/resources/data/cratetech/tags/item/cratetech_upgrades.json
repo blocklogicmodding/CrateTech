@@ -1,0 +1,10 @@
+{
+  "values": [
+    "cratetech:collector_upgrade",
+    "cratetech:hopper_upgrade",
+    "cratetech:compacting_upgrade",
+    "cratetech:shulker_upgrade",
+    "cratetech:item_filter",
+    "cratetech:upgrade_base"
+  ]
+}

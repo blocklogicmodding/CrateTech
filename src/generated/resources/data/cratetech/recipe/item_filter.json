@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "U": {
+      "item": "cratetech:upgrade_base"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "PUP",
+    "IPI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "cratetech:item_filter"
+  }
+}
