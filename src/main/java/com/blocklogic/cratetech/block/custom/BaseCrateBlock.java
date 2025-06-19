@@ -1,9 +1,13 @@
 package com.blocklogic.cratetech.block.custom;
 
 import com.blocklogic.cratetech.block.entity.BaseCrateBlockEntity;
+import com.blocklogic.cratetech.network.CTNetworkHandler;
+import com.blocklogic.cratetech.network.SyncCollectorSettingsPacket;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -34,7 +38,14 @@ public abstract class BaseCrateBlock extends BaseEntityBlock {
         if (!level.isClientSide()) {
             BlockEntity entity = level.getBlockEntity(pos);
             if (entity instanceof BaseCrateBlockEntity crateEntity) {
-                player.openMenu(crateEntity, pos);
+                if (player instanceof ServerPlayer serverPlayer) {
+                    CTNetworkHandler.sendToPlayer(serverPlayer, new SyncCollectorSettingsPacket(pos, crateEntity.getCollectorSettings()));
+                }
+
+                player.openMenu(new SimpleMenuProvider(
+                        (containerId, playerInventory, p) -> crateEntity.createCustomMenu(containerId, playerInventory, p),
+                        crateEntity.getDisplayName()
+                ), buf -> buf.writeBlockPos(pos));
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());
@@ -60,6 +71,5 @@ public abstract class BaseCrateBlock extends BaseEntityBlock {
         return createTickerHelper(blockEntityType, getBlockEntityType(), BaseCrateBlockEntity::serverTick);
     }
 
-    // Abstract method to get the specific block entity type for each crate size
     protected abstract BlockEntityType<? extends BaseCrateBlockEntity> getBlockEntityType();
 }

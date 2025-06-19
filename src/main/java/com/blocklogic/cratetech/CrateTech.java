@@ -5,12 +5,8 @@ import com.blocklogic.cratetech.block.entity.CTBlockEntities;
 import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.item.CTCreativeTab;
 import com.blocklogic.cratetech.item.CTItems;
-import com.blocklogic.cratetech.network.CTNetworkHandler;
 import com.blocklogic.cratetech.screen.CTMenuTypes;
-import com.blocklogic.cratetech.screen.custom.HugeCrateScreen;
-import com.blocklogic.cratetech.screen.custom.LargeCrateScreen;
-import com.blocklogic.cratetech.screen.custom.MediumCrateScreen;
-import com.blocklogic.cratetech.screen.custom.SmallCrateScreen;
+import com.blocklogic.cratetech.screen.custom.*;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.slf4j.Logger;
 
@@ -77,6 +73,8 @@ public class CrateTech {
             event.register(CTMenuTypes.MEDIUM_CRATE_MENU.get(), MediumCrateScreen::new);
             event.register(CTMenuTypes.LARGE_CRATE_MENU.get(), LargeCrateScreen::new);
             event.register(CTMenuTypes.HUGE_CRATE_MENU.get(), HugeCrateScreen::new);
+
+            event.register(CTMenuTypes.COLLECTOR_UPGRADE_MENU.get(), CollectorUpgradeScreen::new);
         }
     }
 }

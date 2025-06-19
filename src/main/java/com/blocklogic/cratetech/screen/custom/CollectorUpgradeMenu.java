@@ -1,6 +1,10 @@
 package com.blocklogic.cratetech.screen.custom;
 
 import com.blocklogic.cratetech.block.entity.BaseCrateBlockEntity;
+import com.blocklogic.cratetech.network.CTNetworkHandler;
+import com.blocklogic.cratetech.network.CollectorAdjustmentPacket;
+import com.blocklogic.cratetech.network.CollectorResetPacket;
+import com.blocklogic.cratetech.network.CollectorWireframePacket;
 import com.blocklogic.cratetech.screen.CTMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,7 +25,6 @@ public class CollectorUpgradeMenu extends AbstractContainerMenu {
         this.level = playerInventory.player.level();
         this.pos = crateEntity.getBlockPos();
 
-        // Player inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9,
@@ -29,7 +32,6 @@ public class CollectorUpgradeMenu extends AbstractContainerMenu {
             }
         }
 
-        // Player hotbar
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventory, col,
                     8 + col * 18, 132));
@@ -42,30 +44,24 @@ public class CollectorUpgradeMenu extends AbstractContainerMenu {
 
     public void adjustCollectionZone(int direction, int change) {
         if (level.isClientSide()) {
-            // Send packet to server
-            // TODO: Implement network packet
+            CTNetworkHandler.sendToServer(new CollectorAdjustmentPacket(pos, direction, change));
         } else {
-            // Server-side logic
             crateEntity.adjustCollectionZone(direction, change);
         }
     }
 
     public void resetCollectionZone() {
         if (level.isClientSide()) {
-            // Send packet to server
-            // TODO: Implement network packet
+            CTNetworkHandler.sendToServer(new CollectorResetPacket(pos));
         } else {
-            // Server-side logic
             crateEntity.resetCollectionZone();
         }
     }
 
     public void toggleWireframe() {
         if (level.isClientSide()) {
-            // Send packet to server
-            // TODO: Implement network packet
+            CTNetworkHandler.sendToServer(new CollectorWireframePacket(pos));
         } else {
-            // Server-side logic
             crateEntity.toggleWireframe();
         }
     }
@@ -80,7 +76,7 @@ public class CollectorUpgradeMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        return ItemStack.EMPTY; // No items to move in this GUI
+        return ItemStack.EMPTY;
     }
 
     @Override

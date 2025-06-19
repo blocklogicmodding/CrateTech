@@ -66,7 +66,6 @@ public record CollectorSettings(
     }
 
     public CollectorSettings withAdjustment(int direction, int adjustment) {
-        // Clamp adjustment between -6 and +9
         adjustment = Math.max(-6, Math.min(9, adjustment));
 
         return switch (direction) {

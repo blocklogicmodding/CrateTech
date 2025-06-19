@@ -8,7 +8,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
 
 public class LargeCrateBlockEntity extends BaseCrateBlockEntity {
     public static final int INVENTORY_SIZE = 59;
@@ -32,9 +31,8 @@ public class LargeCrateBlockEntity extends BaseCrateBlockEntity {
         return 6;
     }
 
-    @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return new LargeCrateMenu(containerId, playerInventory, this.itemHandler);
+    public AbstractContainerMenu createCustomMenu(int containerId, Inventory playerInventory, Player player) {
+        return new LargeCrateMenu(containerId, playerInventory, this.itemHandler, this.getBlockPos());
     }
 }

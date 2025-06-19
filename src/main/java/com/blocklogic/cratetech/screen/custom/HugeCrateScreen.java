@@ -115,7 +115,6 @@ public class HugeCrateScreen extends AbstractContainerScreen<HugeCrateMenu> {
         int y = (this.height - this.imageHeight) / 2;
 
         if (hasCollectorUpgrade() && isMouseOverButton(mouseX, mouseY, x + COLLECTOR_BUTTON_X, y + COLLECTOR_BUTTON_Y)) {
-            // Send packet to server to open collector upgrade menu
             CTNetworkHandler.sendToServer(new OpenCollectorUpgradePacket(cratePos));
             return true;
         }

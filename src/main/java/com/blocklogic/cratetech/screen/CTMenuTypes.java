@@ -25,7 +25,7 @@ public class CTMenuTypes {
                         Level level = inv.player.level();
                         BlockEntity blockEntity = level.getBlockEntity(pos);
                         if (blockEntity instanceof SmallCrateBlockEntity smallCrate) {
-                            return new SmallCrateMenu(windowId, inv, smallCrate.getItemHandler());
+                            return new SmallCrateMenu(windowId, inv, smallCrate.getItemHandler(), pos);
                         }
                         throw new IllegalStateException("Block entity is not a SmallCrateBlockEntity!");
                     }));
@@ -37,7 +37,7 @@ public class CTMenuTypes {
                         Level level = inv.player.level();
                         BlockEntity blockEntity = level.getBlockEntity(pos);
                         if (blockEntity instanceof MediumCrateBlockEntity mediumCrate) {
-                            return new MediumCrateMenu(windowId, inv, mediumCrate.getItemHandler());
+                            return new MediumCrateMenu(windowId, inv, mediumCrate.getItemHandler(), pos);
                         }
                         throw new IllegalStateException("Block entity is not a MediumCrateBlockEntity!");
                     }));
@@ -49,7 +49,7 @@ public class CTMenuTypes {
                         Level level = inv.player.level();
                         BlockEntity blockEntity = level.getBlockEntity(pos);
                         if (blockEntity instanceof LargeCrateBlockEntity largeCrate) {
-                            return new LargeCrateMenu(windowId, inv, largeCrate.getItemHandler());
+                            return new LargeCrateMenu(windowId, inv, largeCrate.getItemHandler(), pos);
                         }
                         throw new IllegalStateException("Block entity is not a LargeCrateBlockEntity!");
                     }));
@@ -61,7 +61,7 @@ public class CTMenuTypes {
                         Level level = inv.player.level();
                         BlockEntity blockEntity = level.getBlockEntity(pos);
                         if (blockEntity instanceof HugeCrateBlockEntity hugeCrate) {
-                            return new HugeCrateMenu(windowId, inv, hugeCrate.getItemHandler());
+                            return new HugeCrateMenu(windowId, inv, hugeCrate.getItemHandler(), pos);
                         }
                         throw new IllegalStateException("Block entity is not a HugeCrateBlockEntity!");
                     }));

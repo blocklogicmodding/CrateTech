@@ -1,7 +1,7 @@
 package com.blocklogic.cratetech.block.entity;
 
-import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.component.CollectorSettings;
+import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -9,18 +9,21 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuProvider {
     protected final ItemStackHandler itemHandler;
@@ -58,7 +61,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         return false;
     }
 
-    // Collector Settings - stored as fields in the block entity
     private CollectorSettings collectorSettings = CollectorSettings.DEFAULT;
 
     public CollectorSettings getCollectorSettings() {
@@ -100,7 +102,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         super.saveAdditional(tag, registries);
         tag.put("inventory", itemHandler.serializeNBT(registries));
 
-        // Save collector settings
         if (!collectorSettings.equals(CollectorSettings.DEFAULT)) {
             CompoundTag collectorTag = new CompoundTag();
             collectorTag.putInt("down", collectorSettings.downAdjustment());
@@ -121,7 +122,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             itemHandler.deserializeNBT(registries, tag.getCompound("inventory"));
         }
 
-        // Load collector settings
         if (tag.contains("collector_settings")) {
             CompoundTag collectorTag = tag.getCompound("collector_settings");
             this.collectorSettings = new CollectorSettings(
@@ -162,18 +162,145 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-        return new ChestMenu(getMenuType(), containerId, playerInventory,
-                new ItemStackHandlerContainer(itemHandler), getMenuRows());
+        return createCustomMenu(containerId, playerInventory, player);
     }
 
-    public static void serverTick(Level level, BlockPos pos, BlockState state, BaseCrateBlockEntity blockEntity) {
-        // TODO: Add upgrade module processing here
-        // This will handle collector upgrades, hopper upgrades, compacting upgrades, etc.
+    public abstract AbstractContainerMenu createCustomMenu(int containerId, Inventory playerInventory, Player player);
 
-        // Example collector logic:
-        // if (blockEntity.hasCollectorUpgrade()) {
-        //     blockEntity.performCollection(level, pos);
-        // }
+    public static void serverTick(Level level, BlockPos pos, BlockState state, BaseCrateBlockEntity blockEntity) {
+        if (blockEntity.hasCollectorUpgrade()) {
+            blockEntity.performCollection(level, pos);
+        }
+    }
+
+    private boolean hasCollectorUpgrade() {
+        int upgradeSlotStart = getUpgradeSlotStart();
+        for (int i = 0; i < 4; i++) {
+            ItemStack stack = itemHandler.getStackInSlot(upgradeSlotStart + i);
+            if (!stack.isEmpty() && stack.getItem() == CTItems.COLLECTOR_UPGRADE.get()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int getUpgradeSlotStart() {
+        if (inventorySize == 14) return 10;
+        if (inventorySize == 32) return 28;
+        if (inventorySize == 59) return 55;
+        if (inventorySize == 109) return 105;
+        return 0;
+    }
+
+    private void performCollection(Level level, BlockPos pos) {
+        if (level.getGameTime() % 20 != 0) {
+            return;
+        }
+
+        CollectorSettings settings = getCollectorSettings();
+
+        int baseRadius = 3;
+        int minX = pos.getX() - baseRadius - settings.westAdjustment();
+        int maxX = pos.getX() + baseRadius + settings.eastAdjustment();
+        int minY = pos.getY() - baseRadius - settings.downAdjustment();
+        int maxY = pos.getY() + baseRadius + settings.upAdjustment();
+        int minZ = pos.getZ() - baseRadius - settings.northAdjustment();
+        int maxZ = pos.getZ() + baseRadius + settings.southAdjustment();
+
+        AABB collectionArea = new AABB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
+
+        List<ItemEntity> itemEntities = level.getEntitiesOfClass(ItemEntity.class, collectionArea);
+
+        for (ItemEntity itemEntity : itemEntities) {
+            if (itemEntity.isRemoved() || !itemEntity.isAlive()) {
+                continue;
+            }
+
+            ItemStack itemStack = itemEntity.getItem();
+
+            if (!passesFilter(itemStack)) {
+                continue;
+            }
+
+            ItemStack remainder = insertItemIntoCrate(itemStack);
+
+            if (remainder.isEmpty()) {
+                itemEntity.discard();
+            } else if (remainder.getCount() < itemStack.getCount()) {
+                itemEntity.setItem(remainder);
+            }
+        }
+    }
+
+    private boolean passesFilter(ItemStack itemStack) {
+        int filterSlot = getFilterSlot();
+        ItemStack filterStack = itemHandler.getStackInSlot(filterSlot);
+
+        if (filterStack.isEmpty() || !(filterStack.getItem() == CTItems.ITEM_FILTER.get())) {
+            return true;
+        }
+
+        return true;
+    }
+
+    private int getFilterSlot() {
+        if (inventorySize == 14) return 9;
+        if (inventorySize == 32) return 27;
+        if (inventorySize == 59) return 54;
+        if (inventorySize == 109) return 104;
+        return 0;
+    }
+
+    private ItemStack insertItemIntoCrate(ItemStack itemStack) {
+        int storageSlots = getStorageSlotCount();
+
+        ItemStack remaining = itemStack.copy();
+
+        for (int i = 0; i < storageSlots; i++) {
+            ItemStack slotStack = itemHandler.getStackInSlot(i);
+            if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(slotStack, remaining)) {
+                int maxStackSize = Math.min(slotStack.getMaxStackSize(), itemHandler.getSlotLimit(i));
+                int canInsert = maxStackSize - slotStack.getCount();
+                if (canInsert > 0) {
+                    int toInsert = Math.min(canInsert, remaining.getCount());
+                    slotStack.grow(toInsert);
+                    remaining.shrink(toInsert);
+                    setChanged();
+
+                    if (remaining.isEmpty()) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < storageSlots; i++) {
+            ItemStack slotStack = itemHandler.getStackInSlot(i);
+            if (slotStack.isEmpty()) {
+                int maxStackSize = Math.min(remaining.getMaxStackSize(), itemHandler.getSlotLimit(i));
+                int toInsert = Math.min(maxStackSize, remaining.getCount());
+
+                ItemStack insertStack = remaining.copy();
+                insertStack.setCount(toInsert);
+                itemHandler.setStackInSlot(i, insertStack);
+                remaining.shrink(toInsert);
+                setChanged();
+
+                if (remaining.isEmpty()) {
+                    return ItemStack.EMPTY;
+                }
+            }
+        }
+
+        return remaining;
+    }
+
+    private int getStorageSlotCount() {
+        if (inventorySize == 14) return 9;
+        if (inventorySize == 32) return 27;
+        if (inventorySize == 59) return 54;
+        if (inventorySize == 109) return 104;
+        return 0;
     }
 
     private static class ItemStackHandlerContainer implements net.minecraft.world.Container {
