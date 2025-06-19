@@ -1,12 +1,17 @@
 package com.blocklogic.cratetech.block.entity;
 
+import com.blocklogic.cratetech.screen.custom.LargeCrateMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 public class LargeCrateBlockEntity extends BaseCrateBlockEntity {
-    public static final int INVENTORY_SIZE = 54; // 6x9 = 54 slots
+    public static final int INVENTORY_SIZE = 59;
 
     public LargeCrateBlockEntity(BlockPos pos, BlockState blockState) {
         super(CTBlockEntities.LARGE_CRATE_BE.get(), pos, blockState, INVENTORY_SIZE);
@@ -19,11 +24,17 @@ public class LargeCrateBlockEntity extends BaseCrateBlockEntity {
 
     @Override
     protected MenuType<?> getMenuType() {
-        return MenuType.GENERIC_9x6;
+        return null; // Using custom menu
     }
 
     @Override
     protected int getMenuRows() {
         return 6;
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+        return new LargeCrateMenu(containerId, playerInventory, this.itemHandler);
     }
 }

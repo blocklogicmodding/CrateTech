@@ -10,20 +10,20 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
-public class HugeCrateMenu extends AbstractContainerMenu {
+public class LargeCrateMenu extends AbstractContainerMenu {
     private final IItemHandler itemHandler;
-    private final int storageSlots = 104;
-    private static final int FILTER_SLOT = 104;
-    private static final int UPGRADE_SLOTS_START = 105;
+    private final int storageSlots = 54;
+    private static final int FILTER_SLOT = 54;
+    private static final int UPGRADE_SLOTS_START = 55;
     private static final int UPGRADE_SLOTS_COUNT = 4;
 
-    public HugeCrateMenu(int containerId, Inventory playerInventory, IItemHandler itemHandler) {
-        super(CTMenuTypes.HUGE_CRATE_MENU.get(), containerId);
+    public LargeCrateMenu(int containerId, Inventory playerInventory, IItemHandler itemHandler) {
+        super(CTMenuTypes.LARGE_CRATE_MENU.get(), containerId);
         this.itemHandler = itemHandler;
 
         int slotIndex = 0;
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 13; col++) {
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 9; col++) {
                 this.addSlot(new SlotItemHandler(itemHandler, slotIndex++,
                         8 + col * 18, 16 + row * 18));
             }
@@ -67,13 +67,13 @@ public class HugeCrateMenu extends AbstractContainerMenu {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9,
-                        44 + col * 18, 172 + row * 18));
+                        8 + col * 18, 136 + row * 18));
             }
         }
 
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventory, col,
-                    44 + col * 18, 230));
+                    8 + col * 18, 194));
         }
     }
 

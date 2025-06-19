@@ -32,7 +32,24 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             protected void onContentsChanged(int slot) {
                 setChanged();
             }
+
+            @Override
+            public int getSlotLimit(int slot) {
+                if (isFilterOrUpgradeSlot(slot)) {
+                    return 1;
+                }
+                return super.getSlotLimit(slot);
+            }
         };
+    }
+
+    private boolean isFilterOrUpgradeSlot(int slot) {
+        if (inventorySize == 59) {
+            return slot >= 54;
+        } else if (inventorySize == 109) {
+            return slot >= 104;
+        }
+        return false;
     }
 
     @Override
@@ -82,7 +99,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         // This will handle collector upgrades, hopper upgrades, compacting upgrades, etc.
     }
 
-    // Helper class to adapt ItemStackHandler to Container interface for menus
     private static class ItemStackHandlerContainer implements net.minecraft.world.Container {
         private final ItemStackHandler handler;
 
@@ -129,7 +145,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
         @Override
         public void setChanged() {
-            // Handled by ItemStackHandler
         }
 
         @Override

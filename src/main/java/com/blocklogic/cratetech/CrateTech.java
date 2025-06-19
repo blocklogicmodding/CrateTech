@@ -6,6 +6,7 @@ import com.blocklogic.cratetech.item.CTCreativeTab;
 import com.blocklogic.cratetech.item.CTItems;
 import com.blocklogic.cratetech.screen.CTMenuTypes;
 import com.blocklogic.cratetech.screen.custom.HugeCrateScreen;
+import com.blocklogic.cratetech.screen.custom.LargeCrateScreen;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import org.slf4j.Logger;
 
@@ -67,6 +68,7 @@ public class CrateTech {
 
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(CTMenuTypes.LARGE_CRATE_MENU.get(), LargeCrateScreen::new);
             event.register(CTMenuTypes.HUGE_CRATE_MENU.get(), HugeCrateScreen::new);
         }
     }
