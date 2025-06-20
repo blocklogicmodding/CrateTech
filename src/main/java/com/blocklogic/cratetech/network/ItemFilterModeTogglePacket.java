@@ -2,6 +2,7 @@ package com.blocklogic.cratetech.network;
 
 import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.component.ItemFilterSettings;
+import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -50,7 +51,7 @@ public record ItemFilterModeTogglePacket(boolean isWhitelistToggle) implements C
     private static ItemStack findItemFilterInInventory(ServerPlayer player) {
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
-            if (!stack.isEmpty() && stack.getItem() == com.blocklogic.cratetech.item.CTItems.ITEM_FILTER.get()) {
+            if (!stack.isEmpty() && stack.getItem() == CTItems.ITEM_FILTER.get()) {
                 return stack;
             }
         }

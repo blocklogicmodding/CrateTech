@@ -17,7 +17,6 @@ public class ItemFilterScreen extends AbstractContainerScreen<ItemFilterMenu> {
     private static final int MATCH_TAG_BUTTON_Y = 9;
     private static final int BUTTON_SIZE = 12;
 
-    // Button texture coordinates
     private static final int WHITELIST_ACTIVE_U = 176;
     private static final int WHITELIST_ACTIVE_V = 0;
     private static final int WHITELIST_ACTIVE_HOVER_U = 188;

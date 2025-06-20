@@ -1,5 +1,6 @@
 package com.blocklogic.cratetech.screen.custom;
 
+import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.component.ItemFilterSettings;
 import com.blocklogic.cratetech.network.CTNetworkHandler;
 import com.blocklogic.cratetech.network.ItemFilterModeTogglePacket;
@@ -27,14 +28,12 @@ public class ItemFilterMenu extends AbstractContainerMenu {
         this.filterItemStack = filterItemStack;
         this.ghostItemHandler = new ItemFilterGhostItemHandler(27, this);
 
-        // Load existing filter settings
         ItemFilterSettings settings = getFilterSettings();
         List<Item> filterItems = settings.filterItems();
         for (int i = 0; i < Math.min(27, filterItems.size()); i++) {
             ghostItemHandler.setItem(i, new ItemStack(filterItems.get(i)));
         }
 
-        // Add filter ghost slots (9x3 grid)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 int slotIndex = row * 9 + col;
@@ -43,7 +42,6 @@ public class ItemFilterMenu extends AbstractContainerMenu {
             }
         }
 
-        // Add player inventory slots
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 this.addSlot(new Slot(playerInventory, col + row * 9 + 9,
@@ -51,7 +49,6 @@ public class ItemFilterMenu extends AbstractContainerMenu {
             }
         }
 
-        // Add player hotbar slots
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventory, col,
                     8 + col * 18, 155));
@@ -72,7 +69,7 @@ public class ItemFilterMenu extends AbstractContainerMenu {
         ItemStack carriedStack = getCarried();
 
         if (clickType == ClickType.PICKUP) {
-            if (button == 0) { // Left click
+            if (button == 0) {
                 if (!carriedStack.isEmpty()) {
                     ItemStack ghostStack = carriedStack.copy();
                     ghostStack.setCount(1);
@@ -80,7 +77,7 @@ public class ItemFilterMenu extends AbstractContainerMenu {
                 } else {
                     ghostItemHandler.setStackInSlot(slotId, ItemStack.EMPTY);
                 }
-            } else if (button == 1) { // Right click
+            } else if (button == 1) {
                 ghostItemHandler.setStackInSlot(slotId, ItemStack.EMPTY);
             }
         } else if (clickType == ClickType.QUICK_MOVE) {
@@ -106,12 +103,10 @@ public class ItemFilterMenu extends AbstractContainerMenu {
     }
 
     public void toggleWhitelistMode() {
-        // Update locally for immediate visual feedback
         ItemFilterSettings currentSettings = getFilterSettings();
         ItemFilterSettings newSettings = currentSettings.withWhitelistMode(!currentSettings.whitelistMode());
         setFilterSettings(newSettings);
 
-        // Send to server so it persists
         if (level.isClientSide()) {
             CTNetworkHandler.sendToServer(new ItemFilterModeTogglePacket(true));
         }
@@ -136,18 +131,18 @@ public class ItemFilterMenu extends AbstractContainerMenu {
     }
 
     private ItemFilterSettings getFilterSettings() {
-        ItemFilterSettings settings = filterItemStack.get(com.blocklogic.cratetech.component.CTDataComponents.ITEM_FILTER_SETTINGS.get());
+        ItemFilterSettings settings = filterItemStack.get(CTDataComponents.ITEM_FILTER_SETTINGS.get());
         return settings != null ? settings : ItemFilterSettings.DEFAULT;
     }
 
     private void setFilterSettings(ItemFilterSettings settings) {
-        filterItemStack.set(com.blocklogic.cratetech.component.CTDataComponents.ITEM_FILTER_SETTINGS.get(), settings);
+        filterItemStack.set(CTDataComponents.ITEM_FILTER_SETTINGS.get(), settings);
     }
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         if (index < 27) {
-            return ItemStack.EMPTY; // Ghost slots don't transfer
+            return ItemStack.EMPTY;
         }
 
         ItemStack itemstack = ItemStack.EMPTY;
@@ -157,11 +152,11 @@ public class ItemFilterMenu extends AbstractContainerMenu {
             ItemStack slotStack = slot.getItem();
             itemstack = slotStack.copy();
 
-            if (index >= 27 && index < 54) { // Player inventory
+            if (index >= 27 && index < 54) {
                 if (!this.moveItemStackTo(slotStack, 54, 63, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 54 && index < 63) { // Player hotbar
+            } else if (index >= 54 && index < 63) {
                 if (!this.moveItemStackTo(slotStack, 27, 54, false)) {
                     return ItemStack.EMPTY;
                 }

@@ -4,6 +4,7 @@ import com.blocklogic.cratetech.block.entity.BaseCrateBlockEntity;
 import com.blocklogic.cratetech.network.CTNetworkHandler;
 import com.blocklogic.cratetech.network.CollectorAdjustmentPacket;
 import com.blocklogic.cratetech.network.CollectorResetPacket;
+import com.blocklogic.cratetech.network.CollectorUniformAdjustmentPacket;
 import com.blocklogic.cratetech.network.CollectorWireframePacket;
 import com.blocklogic.cratetech.screen.CTMenuTypes;
 import net.minecraft.core.BlockPos;
@@ -47,6 +48,14 @@ public class CollectorUpgradeMenu extends AbstractContainerMenu {
             CTNetworkHandler.sendToServer(new CollectorAdjustmentPacket(pos, direction, change));
         } else {
             crateEntity.adjustCollectionZone(direction, change);
+        }
+    }
+
+    public void adjustCollectionZoneUniform(int change) {
+        if (level.isClientSide()) {
+            CTNetworkHandler.sendToServer(new CollectorUniformAdjustmentPacket(pos, change));
+        } else {
+            crateEntity.adjustCollectionZoneUniform(change);
         }
     }
 

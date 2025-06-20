@@ -41,6 +41,12 @@ public class CollectorUpgradeScreen extends AbstractContainerScreen<CollectorUpg
     private static final int WIREFRAME_BUTTON_X = 159;
     private static final int WIREFRAME_BUTTON_Y = 39;
 
+    // Uniform adjustment buttons
+    private static final int UNIFORM_INCREASE_BUTTON_X = 135;
+    private static final int UNIFORM_INCREASE_BUTTON_Y = 15;
+    private static final int UNIFORM_DECREASE_BUTTON_X = 153;
+    private static final int UNIFORM_DECREASE_BUTTON_Y = 15;
+
     public CollectorUpgradeScreen(CollectorUpgradeMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.imageWidth = 176;
@@ -83,6 +89,17 @@ public class CollectorUpgradeScreen extends AbstractContainerScreen<CollectorUpg
                 x + WIREFRAME_BUTTON_X, y + WIREFRAME_BUTTON_Y,
                 WIREFRAME_BUTTON_SIZE, WIREFRAME_BUTTON_SIZE);
         renderWireframeButton(guiGraphics, x + WIREFRAME_BUTTON_X, y + WIREFRAME_BUTTON_Y, wireframeHover);
+
+        // Render uniform adjustment buttons
+        boolean uniformIncreaseHover = isMouseOverButton(mouseX, mouseY,
+                x + UNIFORM_INCREASE_BUTTON_X, y + UNIFORM_INCREASE_BUTTON_Y,
+                ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT);
+        renderUniformIncreaseButton(guiGraphics, x + UNIFORM_INCREASE_BUTTON_X, y + UNIFORM_INCREASE_BUTTON_Y, uniformIncreaseHover);
+
+        boolean uniformDecreaseHover = isMouseOverButton(mouseX, mouseY,
+                x + UNIFORM_DECREASE_BUTTON_X, y + UNIFORM_DECREASE_BUTTON_Y,
+                ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT);
+        renderUniformDecreaseButton(guiGraphics, x + UNIFORM_DECREASE_BUTTON_X, y + UNIFORM_DECREASE_BUTTON_Y, uniformDecreaseHover);
     }
 
 
@@ -141,6 +158,18 @@ public class CollectorUpgradeScreen extends AbstractContainerScreen<CollectorUpg
         guiGraphics.blit(TEXTURE, x, y, u, v, WIREFRAME_BUTTON_SIZE, WIREFRAME_BUTTON_SIZE);
     }
 
+    private void renderUniformIncreaseButton(GuiGraphics guiGraphics, int x, int y, boolean hover) {
+        int u = hover ? 176 : 176;
+        int v = hover ? 60 : 50;
+        guiGraphics.blit(TEXTURE, x, y, u, v, ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT);
+    }
+
+    private void renderUniformDecreaseButton(GuiGraphics guiGraphics, int x, int y, boolean hover) {
+        int u = hover ? 192 : 192;
+        int v = hover ? 60 : 50;
+        guiGraphics.blit(TEXTURE, x, y, u, v, ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT);
+    }
+
     private boolean isMouseOverButton(double mouseX, double mouseY, int buttonX, int buttonY, int width, int height) {
         return mouseX >= buttonX && mouseX < buttonX + width &&
                 mouseY >= buttonY && mouseY < buttonY + height;
@@ -181,7 +210,46 @@ public class CollectorUpgradeScreen extends AbstractContainerScreen<CollectorUpg
             return true;
         }
 
+        // Handle uniform adjustment buttons
+        if (isMouseOverButton(mouseX, mouseY,
+                x + UNIFORM_INCREASE_BUTTON_X, y + UNIFORM_INCREASE_BUTTON_Y,
+                ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT)) {
+            menu.adjustCollectionZoneUniform(1);
+            return true;
+        }
+
+        if (isMouseOverButton(mouseX, mouseY,
+                x + UNIFORM_DECREASE_BUTTON_X, y + UNIFORM_DECREASE_BUTTON_Y,
+                ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT)) {
+            menu.adjustCollectionZoneUniform(-1);
+            return true;
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    protected void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        super.renderTooltip(guiGraphics, mouseX, mouseY);
+
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+
+        // Uniform increase button tooltip
+        if (isMouseOverButton(mouseX, mouseY,
+                x + UNIFORM_INCREASE_BUTTON_X, y + UNIFORM_INCREASE_BUTTON_Y,
+                ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT)) {
+            Component tooltip = Component.translatable("gui.cratetech.collector_upgrade.increase_all");
+            guiGraphics.renderTooltip(this.font, tooltip, mouseX, mouseY);
+        }
+
+        // Uniform decrease button tooltip
+        if (isMouseOverButton(mouseX, mouseY,
+                x + UNIFORM_DECREASE_BUTTON_X, y + UNIFORM_DECREASE_BUTTON_Y,
+                ADJUST_BUTTON_WIDTH, ADJUST_BUTTON_HEIGHT)) {
+            Component tooltip = Component.translatable("gui.cratetech.collector_upgrade.decrease_all");
+            guiGraphics.renderTooltip(this.font, tooltip, mouseX, mouseY);
+        }
     }
 
     @Override

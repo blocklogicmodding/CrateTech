@@ -7,7 +7,6 @@ import com.blocklogic.cratetech.block.custom.MediumCrateBlock;
 import com.blocklogic.cratetech.block.custom.SmallCrateBlock;
 import com.blocklogic.cratetech.item.CTItems;
 import com.blocklogic.cratetech.item.custom.CrateBlockItem;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;

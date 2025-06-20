@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.core.registries.Registries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,13 +75,12 @@ public record ItemFilterSettings(
 
     public boolean shouldAllowItem(ItemStack itemStack) {
         if (filterItems.isEmpty()) {
-            return true; // No filter = allow everything
+            return true;
         }
 
         boolean matches = false;
 
         if (matchTags) {
-            // Check if any filter item shares tags with the tested item
             for (Item filterItem : filterItems) {
                 if (sharesTags(new ItemStack(filterItem), itemStack)) {
                     matches = true;
@@ -90,7 +88,6 @@ public record ItemFilterSettings(
                 }
             }
         } else {
-            // Exact item matching
             matches = filterItems.contains(itemStack.getItem());
         }
 

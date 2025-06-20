@@ -2,6 +2,13 @@ package com.blocklogic.cratetech.block.entity;
 
 import com.blocklogic.cratetech.component.*;
 import com.blocklogic.cratetech.item.CTItems;
+import com.blocklogic.cratetech.network.CTNetworkHandler;
+import com.blocklogic.cratetech.network.SyncCollectorSettingsPacket;
+import com.blocklogic.cratetech.network.SyncCompactingSettingsPacket;
+import com.blocklogic.cratetech.network.SyncHopperSettingsPacket;
+import com.blocklogic.cratetech.screen.custom.CollectorUpgradeMenu;
+import com.blocklogic.cratetech.screen.custom.CompactingUpgradeMenu;
+import com.blocklogic.cratetech.screen.custom.HopperUpgradeMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -13,6 +20,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -49,7 +57,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     public BaseCrateBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState, int size) {
         super(type, pos, blockState);
         this.inventorySize = size;
-        // Add 2 extra slots for hopper filters (push and pull)
         this.itemHandler = new ItemStackHandler(size + 2) {
             @Override
             protected void onContentsChanged(int slot) {
@@ -68,7 +75,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
     private boolean isFilterOrUpgradeSlot(int slot) {
         if (inventorySize == 14) {
-            return slot >= 9; // Filter slot, upgrade slots, and hopper filter slots
+            return slot >= 9;
         } else if (inventorySize == 32) {
             return slot >= 27;
         } else if (inventorySize == 59) {
@@ -79,20 +86,19 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         return false;
     }
 
-    // Hopper filter slot indices - these are the last 2 slots in the expanded inventory
     public int getPushFilterSlotIndex() {
-        if (inventorySize == 14) return 14; // Small crate
-        if (inventorySize == 32) return 32; // Medium crate
-        if (inventorySize == 59) return 59; // Large crate
-        if (inventorySize == 109) return 109; // Huge crate
+        if (inventorySize == 14) return 14;
+        if (inventorySize == 32) return 32;
+        if (inventorySize == 59) return 59;
+        if (inventorySize == 109) return 109;
         return inventorySize;
     }
 
     public int getPullFilterSlotIndex() {
-        if (inventorySize == 14) return 15; // Small crate
-        if (inventorySize == 32) return 33; // Medium crate
-        if (inventorySize == 59) return 60; // Large crate
-        if (inventorySize == 109) return 110; // Huge crate
+        if (inventorySize == 14) return 15;
+        if (inventorySize == 32) return 33;
+        if (inventorySize == 59) return 60;
+        if (inventorySize == 109) return 110;
         return inventorySize + 1;
     }
 
@@ -109,10 +115,15 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         return getCollectorSettings().getAdjustment(direction);
     }
 
+    public void adjustCollectionZoneUniform(int change) {
+        CollectorSettings current = getCollectorSettings();
+        setCollectorSettings(current.withUniformAdjustment(change));
+    }
+
     public void adjustCollectionZone(int direction, int change) {
         CollectorSettings current = getCollectorSettings();
         int currentAdjustment = current.getAdjustment(direction);
-        int newAdjustment = Math.max(-6, Math.min(9, currentAdjustment + change));
+        int newAdjustment = Math.max(-3, Math.min(9, currentAdjustment + change));
         setCollectorSettings(current.withAdjustment(direction, newAdjustment));
     }
 
@@ -309,7 +320,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             this.compactingSettings = CompactingSettings.DEFAULT;
         }
 
-        // Sync settings to clients when loaded from NBT
         if (level != null && !level.isClientSide()) {
             syncSettingsToClients();
         }
@@ -318,23 +328,22 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     private void syncSettingsToClients() {
         if (level == null || level.isClientSide()) return;
 
-        // Send all settings to nearby players
         level.players().stream()
-                .filter(player -> player instanceof net.minecraft.server.level.ServerPlayer)
-                .map(player -> (net.minecraft.server.level.ServerPlayer) player)
+                .filter(player -> player instanceof ServerPlayer)
+                .map(player -> (ServerPlayer) player)
                 .filter(player -> player.distanceToSqr(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ()) <= 64 * 64)
                 .forEach(player -> {
                     if (!collectorSettings.equals(CollectorSettings.DEFAULT)) {
-                        com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
-                                new com.blocklogic.cratetech.network.SyncCollectorSettingsPacket(worldPosition, collectorSettings));
+                        CTNetworkHandler.sendToPlayer(player,
+                                new SyncCollectorSettingsPacket(worldPosition, collectorSettings));
                     }
                     if (!hopperSettings.equals(HopperSettings.DEFAULT)) {
-                        com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
-                                new com.blocklogic.cratetech.network.SyncHopperSettingsPacket(worldPosition, hopperSettings));
+                        CTNetworkHandler.sendToPlayer(player,
+                                new SyncHopperSettingsPacket(worldPosition, hopperSettings));
                     }
                     if (!compactingSettings.equals(CompactingSettings.DEFAULT)) {
-                        com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
-                                new com.blocklogic.cratetech.network.SyncCompactingSettingsPacket(worldPosition, compactingSettings));
+                        CTNetworkHandler.sendToPlayer(player,
+                                new SyncCompactingSettingsPacket(worldPosition, compactingSettings));
                     }
                 });
     }
@@ -381,8 +390,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             blockEntity.performCompacting(level, pos);
         }
 
-        // Sync settings periodically to handle any desync issues
-        if (level.getGameTime() % 100 == 0) { // Every 5 seconds
+        if (level.getGameTime() % 100 == 0) {
             blockEntity.syncSettingsToNearbyPlayers();
         }
     }
@@ -391,26 +399,25 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (level == null || level.isClientSide()) return;
 
         level.players().stream()
-                .filter(player -> player instanceof net.minecraft.server.level.ServerPlayer)
-                .map(player -> (net.minecraft.server.level.ServerPlayer) player)
+                .filter(player -> player instanceof ServerPlayer)
+                .map(player -> (ServerPlayer) player)
                 .filter(player -> player.distanceToSqr(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ()) <= 32 * 32)
                 .forEach(player -> {
-                    // Only sync if the player has a relevant menu open
-                    if (player.containerMenu instanceof com.blocklogic.cratetech.screen.custom.CollectorUpgradeMenu ||
-                            player.containerMenu instanceof com.blocklogic.cratetech.screen.custom.HopperUpgradeMenu ||
-                            player.containerMenu instanceof com.blocklogic.cratetech.screen.custom.CompactingUpgradeMenu) {
+                    if (player.containerMenu instanceof CollectorUpgradeMenu ||
+                            player.containerMenu instanceof HopperUpgradeMenu ||
+                            player.containerMenu instanceof CompactingUpgradeMenu) {
 
                         if (!collectorSettings.equals(CollectorSettings.DEFAULT)) {
-                            com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
-                                    new com.blocklogic.cratetech.network.SyncCollectorSettingsPacket(worldPosition, collectorSettings));
+                            CTNetworkHandler.sendToPlayer(player,
+                                    new SyncCollectorSettingsPacket(worldPosition, collectorSettings));
                         }
                         if (!hopperSettings.equals(HopperSettings.DEFAULT)) {
-                            com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
-                                    new com.blocklogic.cratetech.network.SyncHopperSettingsPacket(worldPosition, hopperSettings));
+                            CTNetworkHandler.sendToPlayer(player,
+                                    new SyncHopperSettingsPacket(worldPosition, hopperSettings));
                         }
                         if (!compactingSettings.equals(CompactingSettings.DEFAULT)) {
-                            com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
-                                    new com.blocklogic.cratetech.network.SyncCompactingSettingsPacket(worldPosition, compactingSettings));
+                            CTNetworkHandler.sendToPlayer(player,
+                                    new SyncCompactingSettingsPacket(worldPosition, compactingSettings));
                         }
                     }
                 });
@@ -480,12 +487,12 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         CollectorSettings settings = getCollectorSettings();
 
         int baseRadius = 3;
-        int minX = pos.getX() - baseRadius - settings.westAdjustment();
-        int maxX = pos.getX() + baseRadius + settings.eastAdjustment();
-        int minY = pos.getY() - baseRadius - settings.downAdjustment();
-        int maxY = pos.getY() + baseRadius + settings.upAdjustment();
-        int minZ = pos.getZ() - baseRadius - settings.northAdjustment();
-        int maxZ = pos.getZ() + baseRadius + settings.southAdjustment();
+        int minX = pos.getX() - baseRadius - Math.max(-3, settings.westAdjustment());
+        int maxX = pos.getX() + baseRadius + Math.max(-3, settings.eastAdjustment());
+        int minY = pos.getY() - baseRadius - Math.max(-3, settings.downAdjustment());
+        int maxY = pos.getY() + baseRadius + Math.max(-3, settings.upAdjustment());
+        int minZ = pos.getZ() - baseRadius - Math.max(-3, settings.northAdjustment());
+        int maxZ = pos.getZ() + baseRadius + Math.max(-3, settings.southAdjustment());
 
         AABB collectionArea = new AABB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
 
@@ -583,7 +590,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     private void pushItemsToInventory(IItemHandler targetHandler) {
         int storageSlots = getStorageSlotCount();
 
-        // Get push filter
         ItemStack pushFilterStack = itemHandler.getStackInSlot(getPushFilterSlotIndex());
         ItemFilterSettings pushFilter = null;
         if (!pushFilterStack.isEmpty() && pushFilterStack.getItem() == CTItems.ITEM_FILTER.get()) {
@@ -596,7 +602,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
                 continue;
             }
 
-            // Check push filter
             if (pushFilter != null && !pushFilter.shouldAllowItem(sourceStack)) {
                 continue;
             }
@@ -619,7 +624,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     private void pullItemsFromInventory(IItemHandler sourceHandler) {
         int storageSlots = getStorageSlotCount();
 
-        // Get pull filter
         ItemStack pullFilterStack = itemHandler.getStackInSlot(getPullFilterSlotIndex());
         ItemFilterSettings pullFilter = null;
         if (!pullFilterStack.isEmpty() && pullFilterStack.getItem() == CTItems.ITEM_FILTER.get()) {
@@ -637,7 +641,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
                 continue;
             }
 
-            // Check pull filter
             if (pullFilter != null && !pullFilter.shouldAllowItem(extractStack)) {
                 continue;
             }
@@ -657,7 +660,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
         ItemStack remaining = itemStack.copy();
 
-        // First pass: try to merge with existing stacks
         for (int i = 0; i < storageSlots; i++) {
             ItemStack slotStack = itemHandler.getStackInSlot(i);
             if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(slotStack, remaining)) {
@@ -676,7 +678,6 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             }
         }
 
-        // Second pass: try to insert into empty slots
         for (int i = 0; i < storageSlots; i++) {
             ItemStack slotStack = itemHandler.getStackInSlot(i);
             if (slotStack.isEmpty()) {

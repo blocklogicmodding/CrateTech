@@ -73,7 +73,7 @@ public record CompactingSettings(
 
     public boolean shouldCompactItem(ItemStack itemStack) {
         if (filterItems.isEmpty()) {
-            return true; // No filter = compact everything
+            return true;
         }
 
         boolean isInFilter = filterItems.contains(itemStack.getItem());

@@ -66,7 +66,7 @@ public record CollectorSettings(
     }
 
     public CollectorSettings withAdjustment(int direction, int adjustment) {
-        adjustment = Math.max(-6, Math.min(9, adjustment));
+        adjustment = Math.max(-3, Math.min(9, adjustment));
 
         return switch (direction) {
             case 0 -> new CollectorSettings(adjustment, upAdjustment, northAdjustment, southAdjustment, westAdjustment, eastAdjustment, wireframeVisible);
@@ -81,6 +81,19 @@ public record CollectorSettings(
 
     public CollectorSettings withWireframe(boolean wireframe) {
         return new CollectorSettings(downAdjustment, upAdjustment, northAdjustment, southAdjustment, westAdjustment, eastAdjustment, wireframe);
+    }
+
+    public CollectorSettings withUniformAdjustment(int adjustment) {
+        int clampedAdjustment = Math.max(-3, Math.min(9, adjustment));
+        return new CollectorSettings(
+                Math.max(-3, Math.min(9, downAdjustment + clampedAdjustment)),
+                Math.max(-3, Math.min(9, upAdjustment + clampedAdjustment)),
+                Math.max(-3, Math.min(9, northAdjustment + clampedAdjustment)),
+                Math.max(-3, Math.min(9, southAdjustment + clampedAdjustment)),
+                Math.max(-3, Math.min(9, westAdjustment + clampedAdjustment)),
+                Math.max(-3, Math.min(9, eastAdjustment + clampedAdjustment)),
+                wireframeVisible
+        );
     }
 
     public CollectorSettings reset() {

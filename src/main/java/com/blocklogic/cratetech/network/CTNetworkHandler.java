@@ -28,6 +28,12 @@ public class CTNetworkHandler {
         );
 
         registrar.playToServer(
+                CollectorUniformAdjustmentPacket.TYPE,
+                CollectorUniformAdjustmentPacket.STREAM_CODEC,
+                CollectorUniformAdjustmentPacket::handle
+        );
+
+        registrar.playToServer(
                 CollectorResetPacket.TYPE,
                 CollectorResetPacket.STREAM_CODEC,
                 CollectorResetPacket::handle
@@ -129,6 +135,10 @@ public class CTNetworkHandler {
     }
 
     public static void sendToServer(CollectorAdjustmentPacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(CollectorUniformAdjustmentPacket packet) {
         PacketDistributor.sendToServer(packet);
     }
 

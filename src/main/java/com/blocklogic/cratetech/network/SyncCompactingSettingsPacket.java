@@ -4,10 +4,12 @@ import com.blocklogic.cratetech.block.entity.BaseCrateBlockEntity;
 import com.blocklogic.cratetech.component.CompactingSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -23,8 +25,8 @@ public record SyncCompactingSettingsPacket(BlockPos cratePos, CompactingSettings
 
     private static void encodeSettings(FriendlyByteBuf buf, CompactingSettings settings) {
         buf.writeVarInt(settings.filterItems().size());
-        for (net.minecraft.world.item.Item item : settings.filterItems()) {
-            ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
+        for (Item item : settings.filterItems()) {
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
             buf.writeResourceLocation(itemId);
         }
         buf.writeBoolean(settings.whitelistMode());
@@ -33,10 +35,10 @@ public record SyncCompactingSettingsPacket(BlockPos cratePos, CompactingSettings
 
     private static CompactingSettings decodeSettings(FriendlyByteBuf buf) {
         int size = buf.readVarInt();
-        java.util.List<net.minecraft.world.item.Item> items = new java.util.ArrayList<>();
+        java.util.List<Item> items = new java.util.ArrayList<>();
         for (int i = 0; i < size; i++) {
             ResourceLocation itemId = buf.readResourceLocation();
-            net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(itemId);
+            Item item = BuiltInRegistries.ITEM.get(itemId);
             if (item != null) {
                 items.add(item);
             }

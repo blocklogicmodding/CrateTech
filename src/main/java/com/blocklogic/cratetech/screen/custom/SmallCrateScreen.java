@@ -70,7 +70,7 @@ public class SmallCrateScreen extends AbstractContainerScreen<SmallCrateMenu> {
 
     private boolean hasCollectorUpgrade() {
         for (int i = 0; i < 4; i++) {
-            ItemStack stack = menu.getSlot(10 + i).getItem(); // UPGRADE_SLOTS_START = 10
+            ItemStack stack = menu.getSlot(10 + i).getItem();
             if (!stack.isEmpty() && stack.getItem() == CTItems.COLLECTOR_UPGRADE.get()) {
                 return true;
             }
@@ -80,7 +80,7 @@ public class SmallCrateScreen extends AbstractContainerScreen<SmallCrateMenu> {
 
     private boolean hasHopperUpgrade() {
         for (int i = 0; i < 4; i++) {
-            ItemStack stack = menu.getSlot(10 + i).getItem(); // UPGRADE_SLOTS_START = 10
+            ItemStack stack = menu.getSlot(10 + i).getItem();
             if (!stack.isEmpty() && stack.getItem() == CTItems.HOPPER_UPGRADE.get()) {
                 return true;
             }
@@ -90,7 +90,7 @@ public class SmallCrateScreen extends AbstractContainerScreen<SmallCrateMenu> {
 
     private boolean hasCompactingUpgrade() {
         for (int i = 0; i < 4; i++) {
-            ItemStack stack = menu.getSlot(10 + i).getItem(); // UPGRADE_SLOTS_START = 10
+            ItemStack stack = menu.getSlot(10 + i).getItem();
             if (!stack.isEmpty() && stack.getItem() == CTItems.COMPACTING_UPGRADE.get()) {
                 return true;
             }

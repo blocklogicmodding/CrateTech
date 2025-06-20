@@ -2,6 +2,7 @@ package com.blocklogic.cratetech.network;
 
 import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.component.ItemFilterSettings;
+import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -53,7 +54,6 @@ public record ItemFilterUpdatePacket(List<Item> filterItems) implements CustomPa
     public static void handle(ItemFilterUpdatePacket packet, IPayloadContext context) {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer serverPlayer) {
-                // Find the item filter in player's inventory
                 ItemStack filterStack = findItemFilterInInventory(serverPlayer);
                 if (!filterStack.isEmpty()) {
                     ItemFilterSettings currentSettings = filterStack.get(CTDataComponents.ITEM_FILTER_SETTINGS.get());
@@ -72,7 +72,7 @@ public record ItemFilterUpdatePacket(List<Item> filterItems) implements CustomPa
     private static ItemStack findItemFilterInInventory(ServerPlayer player) {
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack stack = player.getInventory().getItem(i);
-            if (!stack.isEmpty() && stack.getItem() == com.blocklogic.cratetech.item.CTItems.ITEM_FILTER.get()) {
+            if (!stack.isEmpty() && stack.getItem() == CTItems.ITEM_FILTER.get()) {
                 return stack;
             }
         }

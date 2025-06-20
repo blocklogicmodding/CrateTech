@@ -23,7 +23,7 @@ public class LargeCrateBlockEntity extends BaseCrateBlockEntity {
 
     @Override
     protected MenuType<?> getMenuType() {
-        return null; // Using custom menu
+        return null;
     }
 
     @Override
