@@ -49,7 +49,8 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     public BaseCrateBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState, int size) {
         super(type, pos, blockState);
         this.inventorySize = size;
-        this.itemHandler = new ItemStackHandler(size) {
+        // Add 2 extra slots for hopper filters (push and pull)
+        this.itemHandler = new ItemStackHandler(size + 2) {
             @Override
             protected void onContentsChanged(int slot) {
                 setChanged();
@@ -67,7 +68,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
     private boolean isFilterOrUpgradeSlot(int slot) {
         if (inventorySize == 14) {
-            return slot >= 9;
+            return slot >= 9; // Filter slot, upgrade slots, and hopper filter slots
         } else if (inventorySize == 32) {
             return slot >= 27;
         } else if (inventorySize == 59) {
@@ -76,6 +77,23 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             return slot >= 104;
         }
         return false;
+    }
+
+    // Hopper filter slot indices - these are the last 2 slots in the expanded inventory
+    public int getPushFilterSlotIndex() {
+        if (inventorySize == 14) return 14; // Small crate
+        if (inventorySize == 32) return 32; // Medium crate
+        if (inventorySize == 59) return 59; // Large crate
+        if (inventorySize == 109) return 109; // Huge crate
+        return inventorySize;
+    }
+
+    public int getPullFilterSlotIndex() {
+        if (inventorySize == 14) return 15; // Small crate
+        if (inventorySize == 32) return 33; // Medium crate
+        if (inventorySize == 59) return 60; // Large crate
+        if (inventorySize == 109) return 110; // Huge crate
+        return inventorySize + 1;
     }
 
     public CollectorSettings getCollectorSettings() {
@@ -290,6 +308,35 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         } else {
             this.compactingSettings = CompactingSettings.DEFAULT;
         }
+
+        // Sync settings to clients when loaded from NBT
+        if (level != null && !level.isClientSide()) {
+            syncSettingsToClients();
+        }
+    }
+
+    private void syncSettingsToClients() {
+        if (level == null || level.isClientSide()) return;
+
+        // Send all settings to nearby players
+        level.players().stream()
+                .filter(player -> player instanceof net.minecraft.server.level.ServerPlayer)
+                .map(player -> (net.minecraft.server.level.ServerPlayer) player)
+                .filter(player -> player.distanceToSqr(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ()) <= 64 * 64)
+                .forEach(player -> {
+                    if (!collectorSettings.equals(CollectorSettings.DEFAULT)) {
+                        com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
+                                new com.blocklogic.cratetech.network.SyncCollectorSettingsPacket(worldPosition, collectorSettings));
+                    }
+                    if (!hopperSettings.equals(HopperSettings.DEFAULT)) {
+                        com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
+                                new com.blocklogic.cratetech.network.SyncHopperSettingsPacket(worldPosition, hopperSettings));
+                    }
+                    if (!compactingSettings.equals(CompactingSettings.DEFAULT)) {
+                        com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
+                                new com.blocklogic.cratetech.network.SyncCompactingSettingsPacket(worldPosition, compactingSettings));
+                    }
+                });
     }
 
     public void dropContents(Level level, BlockPos pos) {
@@ -333,6 +380,40 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         if (blockEntity.hasCompactingUpgrade()) {
             blockEntity.performCompacting(level, pos);
         }
+
+        // Sync settings periodically to handle any desync issues
+        if (level.getGameTime() % 100 == 0) { // Every 5 seconds
+            blockEntity.syncSettingsToNearbyPlayers();
+        }
+    }
+
+    private void syncSettingsToNearbyPlayers() {
+        if (level == null || level.isClientSide()) return;
+
+        level.players().stream()
+                .filter(player -> player instanceof net.minecraft.server.level.ServerPlayer)
+                .map(player -> (net.minecraft.server.level.ServerPlayer) player)
+                .filter(player -> player.distanceToSqr(worldPosition.getX(), worldPosition.getY(), worldPosition.getZ()) <= 32 * 32)
+                .forEach(player -> {
+                    // Only sync if the player has a relevant menu open
+                    if (player.containerMenu instanceof com.blocklogic.cratetech.screen.custom.CollectorUpgradeMenu ||
+                            player.containerMenu instanceof com.blocklogic.cratetech.screen.custom.HopperUpgradeMenu ||
+                            player.containerMenu instanceof com.blocklogic.cratetech.screen.custom.CompactingUpgradeMenu) {
+
+                        if (!collectorSettings.equals(CollectorSettings.DEFAULT)) {
+                            com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
+                                    new com.blocklogic.cratetech.network.SyncCollectorSettingsPacket(worldPosition, collectorSettings));
+                        }
+                        if (!hopperSettings.equals(HopperSettings.DEFAULT)) {
+                            com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
+                                    new com.blocklogic.cratetech.network.SyncHopperSettingsPacket(worldPosition, hopperSettings));
+                        }
+                        if (!compactingSettings.equals(CompactingSettings.DEFAULT)) {
+                            com.blocklogic.cratetech.network.CTNetworkHandler.sendToPlayer(player,
+                                    new com.blocklogic.cratetech.network.SyncCompactingSettingsPacket(worldPosition, compactingSettings));
+                        }
+                    }
+                });
     }
 
     private boolean hasCollectorUpgrade() {
@@ -502,9 +583,21 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     private void pushItemsToInventory(IItemHandler targetHandler) {
         int storageSlots = getStorageSlotCount();
 
+        // Get push filter
+        ItemStack pushFilterStack = itemHandler.getStackInSlot(getPushFilterSlotIndex());
+        ItemFilterSettings pushFilter = null;
+        if (!pushFilterStack.isEmpty() && pushFilterStack.getItem() == CTItems.ITEM_FILTER.get()) {
+            pushFilter = pushFilterStack.get(CTDataComponents.ITEM_FILTER_SETTINGS.get());
+        }
+
         for (int i = 0; i < storageSlots; i++) {
             ItemStack sourceStack = itemHandler.getStackInSlot(i);
             if (sourceStack.isEmpty()) {
+                continue;
+            }
+
+            // Check push filter
+            if (pushFilter != null && !pushFilter.shouldAllowItem(sourceStack)) {
                 continue;
             }
 
@@ -526,6 +619,13 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
     private void pullItemsFromInventory(IItemHandler sourceHandler) {
         int storageSlots = getStorageSlotCount();
 
+        // Get pull filter
+        ItemStack pullFilterStack = itemHandler.getStackInSlot(getPullFilterSlotIndex());
+        ItemFilterSettings pullFilter = null;
+        if (!pullFilterStack.isEmpty() && pullFilterStack.getItem() == CTItems.ITEM_FILTER.get()) {
+            pullFilter = pullFilterStack.get(CTDataComponents.ITEM_FILTER_SETTINGS.get());
+        }
+
         for (int i = 0; i < sourceHandler.getSlots(); i++) {
             ItemStack sourceStack = sourceHandler.getStackInSlot(i);
             if (sourceStack.isEmpty()) {
@@ -534,6 +634,11 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
             ItemStack extractStack = sourceHandler.extractItem(i, 1, true);
             if (extractStack.isEmpty()) {
+                continue;
+            }
+
+            // Check pull filter
+            if (pullFilter != null && !pullFilter.shouldAllowItem(extractStack)) {
                 continue;
             }
 
@@ -552,6 +657,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
 
         ItemStack remaining = itemStack.copy();
 
+        // First pass: try to merge with existing stacks
         for (int i = 0; i < storageSlots; i++) {
             ItemStack slotStack = itemHandler.getStackInSlot(i);
             if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(slotStack, remaining)) {
@@ -570,6 +676,7 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             }
         }
 
+        // Second pass: try to insert into empty slots
         for (int i = 0; i < storageSlots; i++) {
             ItemStack slotStack = itemHandler.getStackInSlot(i);
             if (slotStack.isEmpty()) {
