@@ -34,10 +34,6 @@
   "tooltip.cratetech.shulker_upgrade.description": "Preserves crate contents and upgrades when broken",
   "tooltip.cratetech.upgrade_base.description": "Base component for crafting upgrades",
   "tooltip.cratetech.item_filter.description": "Filter items for Collector Upgrade",
-  "tooltip.cratetech.tier_upgrade.description": "Upgrades %s Crate to %s Crate",
-  "tooltip.cratetech.tier_upgrade.capacity": "• Capacity: %s → %s slots",
-  "tooltip.cratetech.tier_upgrade.preserves": "• Preserves all contents and upgrades",
-  "tooltip.cratetech.tier_upgrade.usage": "• Right-click on crate to upgrade",
 
   "gui.cratetech.item_filter.title": "Item Filter",
   "gui.cratetech.item_filter.whitelist_mode": "Whitelist Mode: Only collect filtered items",
@@ -48,5 +44,13 @@
   "tooltip.cratetech.item_filter.configured": "Configured with %s filter items",
   "tooltip.cratetech.item_filter.whitelist": "Mode: Whitelist",
   "tooltip.cratetech.item_filter.blacklist": "Mode: Blacklist",
-  "tooltip.cratetech.item_filter.match_tags": "Tag matching enabled"
+  "tooltip.cratetech.item_filter.match_tags": "Tag matching enabled",
+
+  "message.cratetech.upgrade.success": "Successfully upgraded %s Crate to %s Crate!",
+  "message.cratetech.upgrade.invalid_crate": "This upgrade cannot be used on this crate type.",
+
+  "tooltip.cratetech.tier_upgrade.description": "Upgrades %s Crate to %s Crate",
+  "tooltip.cratetech.tier_upgrade.capacity": "• Capacity: %s → %s slots",
+  "tooltip.cratetech.tier_upgrade.preserves": "• Preserves all contents and upgrades",
+  "tooltip.cratetech.tier_upgrade.usage": "• Right-click on crate to upgrade"
 }
