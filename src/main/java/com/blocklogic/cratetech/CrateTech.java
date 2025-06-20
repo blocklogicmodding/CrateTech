@@ -1,6 +1,7 @@
 package com.blocklogic.cratetech;
 
 import com.blocklogic.cratetech.block.CTBlocks;
+import com.blocklogic.cratetech.block.entity.BaseCrateBlockEntity;
 import com.blocklogic.cratetech.block.entity.CTBlockEntities;
 import com.blocklogic.cratetech.component.CTDataComponents;
 import com.blocklogic.cratetech.item.CTCreativeTab;
@@ -44,6 +45,7 @@ public class CrateTech {
         CTCreativeTab.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(BaseCrateBlockEntity::registerCapabilities);
 
     }
 

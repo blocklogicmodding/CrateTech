@@ -40,6 +40,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
@@ -800,5 +801,44 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
                 setChanged();
             }
         }
+    }
+
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, CTBlockEntities.SMALL_CRATE_BE.get(),
+                (blockEntity, direction) -> {
+                    if (blockEntity instanceof SmallCrateBlockEntity crate) {
+                        return crate.getItemHandler(direction);
+                    }
+                    return null;
+                });
+
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, CTBlockEntities.MEDIUM_CRATE_BE.get(),
+                (blockEntity, direction) -> {
+                    if (blockEntity instanceof MediumCrateBlockEntity crate) {
+                        return crate.getItemHandler(direction);
+                    }
+                    return null;
+                });
+
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, CTBlockEntities.LARGE_CRATE_BE.get(),
+                (blockEntity, direction) -> {
+                    if (blockEntity instanceof LargeCrateBlockEntity crate) {
+                        return crate.getItemHandler(direction);
+                    }
+                    return null;
+                });
+
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, CTBlockEntities.HUGE_CRATE_BE.get(),
+                (blockEntity, direction) -> {
+                    if (blockEntity instanceof HugeCrateBlockEntity crate) {
+                        return crate.getItemHandler(direction);
+                    }
+                    return null;
+                });
+    }
+
+    @Nullable
+    public IItemHandler getItemHandler(@Nullable Direction direction) {
+        return this.itemHandler;
     }
 }
