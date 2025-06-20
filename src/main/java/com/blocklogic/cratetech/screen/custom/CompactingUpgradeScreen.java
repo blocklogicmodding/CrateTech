@@ -139,8 +139,8 @@ public class CompactingUpgradeScreen extends AbstractContainerScreen<CompactingU
                 x + WHITELIST_BUTTON_X, y + WHITELIST_BUTTON_Y,
                 BUTTON_SIZE, BUTTON_SIZE)) {
             Component tooltip = menu.isWhitelistMode()
-                    ? Component.literal("Whitelist Mode: Only compact filtered items")
-                    : Component.literal("Blacklist Mode: Compact everything except filtered items");
+                    ? Component.translatable("gui.cratetech.compacting_upgrade.whitelist_mode")
+                    : Component.translatable("gui.cratetech.compacting_upgrade.blacklist_mode");
             guiGraphics.renderTooltip(this.font, tooltip, mouseX, mouseY);
         }
 
@@ -148,8 +148,8 @@ public class CompactingUpgradeScreen extends AbstractContainerScreen<CompactingU
                 x + RECIPE_SIZE_BUTTON_X, y + RECIPE_SIZE_BUTTON_Y,
                 BUTTON_SIZE, BUTTON_SIZE)) {
             Component tooltip = menu.isUse3x3Recipes()
-                    ? Component.literal("3x3 Recipes: 9 items → 1 block")
-                    : Component.literal("2x2 Recipes: 4 items → 1 item");
+                    ? Component.translatable("gui.cratetech.compacting_upgrade.recipe_3x3")
+                    : Component.translatable("gui.cratetech.compacting_upgrade.recipe_2x2");
             guiGraphics.renderTooltip(this.font, tooltip, mouseX, mouseY);
         }
     }

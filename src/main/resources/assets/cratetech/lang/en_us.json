@@ -14,5 +14,10 @@
   "item.cratetech.item_filter": "Item Filter",
   "item.cratetech.small_to_medium_crate_upgrade": "Small to Medium Crate Upgrade",
   "item.cratetech.medium_to_large_crate_upgrade": "Medium to Large Crate Upgrade",
-  "item.cratetech.large_to_medium_crate_upgrade": "Large to Huge Crate Upgrade"
+  "item.cratetech.large_to_medium_crate_upgrade": "Large to Huge Crate Upgrade",
+
+  "gui.cratetech.compacting_upgrade.whitelist_mode": "Whitelist Mode: Only compact filtered items",
+  "gui.cratetech.compacting_upgrade.blacklist_mode": "Blacklist Mode: Compact everything except filtered items",
+  "gui.cratetech.compacting_upgrade.recipe_3x3": "3x3 Recipes: 9 items → 1 block",
+  "gui.cratetech.compacting_upgrade.recipe_2x2": "2x2 Recipes: 4 items → 1 item"
 }
