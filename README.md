@@ -1,25 +1,85 @@
 
-Installation information
-=======
+# CrateTech
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+A storage mod for Minecraft 1.21.1 that adds storage crates with advanced automation capabilities.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+_Inspired by Krate by owmii_
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## Features
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+### Crates
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+CrateTech provides four tiers of storage containers with increasing capacity:
+
+-   **Small Crate**: 9 slots
+-   **Medium Crate**: 27 slots
+-   **Large Crate**: 54 slots
+-   **Huge Crate**: 104 slots
+
+### Upgrade System
+
+All crates can be enhanced with upgrade modules:
+
+#### **Upgrade Base**
+
+The foundation component required for crafting all other upgrades.
+
+#### **Collector Upgrade**
+
+-   Automatically collects items in a configurable area around the crate
+-   Adjustable collection zone (3x3x3 base area, expandable)
+-   Individual directional controls for precise area customization
+-   Wireframe visualization to see collection boundaries
+-   Compatible with Item Filters for selective collection
+
+#### **Hopper Upgrade**
+
+-   Push/pull items to/from adjacent inventories
+-   Configurable per-side operation (Push, Pull, or Disabled)
+-   Visual indicators showing adjacent block types
+-   Support for push/pull filters using Item Filters
+-   Global push/pull mode toggles
+
+#### **Compacting Upgrade**
+
+-   Automatically compacts items using 2x2 or 3x3 crafting recipes
+-   Whitelist/Blacklist filtering system
+-   Toggle between 2x2 and 3x3 recipe modes
+-   Smart recipe detection
+-   Customizable item filter for precise control
+
+#### **Shulker Upgrade**
+
+-   Preserves crate contents and upgrade configurations when broken
+-   Items and settings are retained in the crate item
+-   Perfect for relocation
+
+#### **Item Filter**
+
+-   27-slot filter interface for precise item control
+-   Whitelist/Blacklist modes
+-   Tag matching support for filtering by item categories
+-   Can be used in Collector, Hopper, and other upgrade slots
+
+### Tier Upgrade Items
+
+Seamlessly upgrade your crates without losing contents or configurations:
+
+-   **Small to Medium Crate Upgrade**
+-   **Medium to Large Crate Upgrade**
+-   **Large to Huge Crate Upgrade**
+
+Simply right-click on a crate with the appropriate upgrade item to instantly transform it while preserving all contents and upgrade settings.
+
+## License
+
+All rights reserved. This mod is protected by copyright and may not be redistributed or modified without explicit permission.
+
+**Permitted Uses:**
+
+-   Inclusion in modpacks (public or private)
+-   Content creation (videos, streams, reviews, etc.)
+
+----------
+
+[**Issue Tracker**](https://github.com/blocklogicmodding/FlowTech/issues) | [**BLM Discord**](https://discord.gg/YtdA3AMqsX)
