@@ -370,6 +370,21 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
         return false;
     }
 
+    public boolean hasShulkerUpgrade() {
+        int upgradeSlotStart = getUpgradeSlotStart();
+        for (int i = 0; i < 4; i++) {
+            ItemStack stack = itemHandler.getStackInSlot(upgradeSlotStart + i);
+            if (!stack.isEmpty() && stack.getItem() == CTItems.SHULKER_UPGRADE.get()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getInventorySize() {
+        return inventorySize;
+    }
+
     private int getUpgradeSlotStart() {
         if (inventorySize == 14) return 10;
         if (inventorySize == 32) return 28;

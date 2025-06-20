@@ -6,6 +6,7 @@ import com.blocklogic.cratetech.block.custom.LargeCrateBlock;
 import com.blocklogic.cratetech.block.custom.MediumCrateBlock;
 import com.blocklogic.cratetech.block.custom.SmallCrateBlock;
 import com.blocklogic.cratetech.item.CTItems;
+import com.blocklogic.cratetech.item.custom.CrateBlockItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -50,12 +51,12 @@ public class CTBlocks {
 
     private static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
         DeferredBlock<T> toReturn = BLOCKS.register(name, block);
-        registerBlockItem(name, toReturn);
+        registerCrateBlockItem(name, toReturn);
         return toReturn;
     }
 
-    private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
-        CTItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));
+    private static <T extends Block> void registerCrateBlockItem(String name, DeferredBlock<T> block) {
+        CTItems.ITEMS.register(name, () -> new CrateBlockItem(block.get(), new Item.Properties()));
     }
 
     public static void register(IEventBus eventBus) {

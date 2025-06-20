@@ -33,6 +33,13 @@ public class CTDataComponents {
                             .networkSynchronized(CompactingSettings.STREAM_CODEC)
                             .build());
 
+    public static final Supplier<DataComponentType<CrateContents>> CRATE_CONTENTS =
+            DATA_COMPONENT_TYPES.register("crate_contents", () ->
+                    DataComponentType.<CrateContents>builder()
+                            .persistent(CrateContents.CODEC)
+                            .networkSynchronized(CrateContents.STREAM_CODEC)
+                            .build());
+
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT_TYPES.register(eventBus);
     }

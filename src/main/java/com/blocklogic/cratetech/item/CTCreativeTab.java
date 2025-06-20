@@ -29,6 +29,9 @@ public class CTCreativeTab {
                         output.accept(CTItems.COMPACTING_UPGRADE);
                         output.accept(CTItems.SHULKER_UPGRADE);
                         output.accept(CTItems.ITEM_FILTER);
+                        output.accept(CTItems.SMALL_TO_MEDIUM_CRATE_UPGRADE);
+                        output.accept(CTItems.MEDIUM_TO_LARGE_CRATE_UPGRADE);
+                        output.accept(CTItems.LARGE_TO_HUGE_CRATE_UPGRADE);
                     }).build());
 
     public static void register (IEventBus eventBus) {
