@@ -104,6 +104,24 @@ public class CTNetworkHandler {
                 SyncCompactingSettingsPacket.STREAM_CODEC,
                 SyncCompactingSettingsPacket::handle
         );
+
+        registrar.playToServer(
+                ItemFilterUpdatePacket.TYPE,
+                ItemFilterUpdatePacket.STREAM_CODEC,
+                ItemFilterUpdatePacket::handle
+        );
+
+        registrar.playToServer(
+                ItemFilterModeTogglePacket.TYPE,
+                ItemFilterModeTogglePacket.STREAM_CODEC,
+                ItemFilterModeTogglePacket::handle
+        );
+
+        registrar.playToClient(
+                SyncItemFilterSettingsPacket.TYPE,
+                SyncItemFilterSettingsPacket.STREAM_CODEC,
+                SyncItemFilterSettingsPacket::handle
+        );
     }
 
     public static void sendToServer(OpenCollectorUpgradePacket packet) {
@@ -167,6 +185,18 @@ public class CTNetworkHandler {
     }
 
     public static void sendToPlayer(ServerPlayer player, SyncCompactingSettingsPacket packet) {
+        PacketDistributor.sendToPlayer(player, packet);
+    }
+
+    public static void sendToServer(ItemFilterUpdatePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToServer(ItemFilterModeTogglePacket packet) {
+        PacketDistributor.sendToServer(packet);
+    }
+
+    public static void sendToPlayer(ServerPlayer player, SyncItemFilterSettingsPacket packet) {
         PacketDistributor.sendToPlayer(player, packet);
     }
 }

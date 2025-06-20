@@ -40,6 +40,13 @@ public class CTDataComponents {
                             .networkSynchronized(CrateContents.STREAM_CODEC)
                             .build());
 
+    public static final Supplier<DataComponentType<ItemFilterSettings>> ITEM_FILTER_SETTINGS =
+            DATA_COMPONENT_TYPES.register("item_filter_settings", () ->
+                    DataComponentType.<ItemFilterSettings>builder()
+                            .persistent(ItemFilterSettings.CODEC)
+                            .networkSynchronized(ItemFilterSettings.STREAM_CODEC)
+                            .build());
+
     public static void register(IEventBus eventBus) {
         DATA_COMPONENT_TYPES.register(eventBus);
     }

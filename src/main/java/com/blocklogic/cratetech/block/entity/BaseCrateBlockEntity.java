@@ -1,8 +1,6 @@
 package com.blocklogic.cratetech.block.entity;
 
-import com.blocklogic.cratetech.component.CollectorSettings;
-import com.blocklogic.cratetech.component.CompactingSettings;
-import com.blocklogic.cratetech.component.HopperSettings;
+import com.blocklogic.cratetech.component.*;
 import com.blocklogic.cratetech.item.CTItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -441,8 +439,12 @@ public abstract class BaseCrateBlockEntity extends BlockEntity implements MenuPr
             return true;
         }
 
-        // TODO: Implement filter logic when Item Filter functionality is added
-        return true;
+        ItemFilterSettings filterSettings = filterStack.get(CTDataComponents.ITEM_FILTER_SETTINGS.get());
+        if (filterSettings == null) {
+            return true;
+        }
+
+        return filterSettings.shouldAllowItem(itemStack);
     }
 
     private int getFilterSlot() {

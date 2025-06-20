@@ -6,6 +6,7 @@ import com.blocklogic.cratetech.screen.custom.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.IEventBus;
@@ -100,6 +101,13 @@ public class CTMenuTypes {
                             return new CompactingUpgradeMenu(windowId, inv, crateEntity);
                         }
                         throw new IllegalStateException("Block entity is not a BaseCrateBlockEntity!");
+                    }));
+
+    public static final Supplier<MenuType<ItemFilterMenu>> ITEM_FILTER_MENU =
+            MENUS.register("item_filter_menu", () ->
+                    IMenuTypeExtension.create((windowId, inv, data) -> {
+                        ItemStack filterStack = ItemStack.STREAM_CODEC.decode(data);
+                        return new ItemFilterMenu(windowId, inv, filterStack);
                     }));
 
     public static void register(IEventBus eventBus) {
