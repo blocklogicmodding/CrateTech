@@ -1,6 +1,8 @@
 
 # CrateTech
 
+![CrateTech Banner](https://deonjonker.com/blm/ct/ct_banner.png)
+
 A storage mod for Minecraft 1.21.1 that adds storage crates with advanced automation capabilities.
 
 _Inspired by Krate by owmii_
