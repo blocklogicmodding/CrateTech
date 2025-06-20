@@ -21,9 +21,9 @@
   "gui.cratetech.compacting_upgrade.recipe_3x3": "3x3 Recipes: 9 items → 1 block",
   "gui.cratetech.compacting_upgrade.recipe_2x2": "2x2 Recipes: 4 items → 1 item",
 
-  "tooltip.cratetech.crate.contains_items": "Contains items (%s total)",
+  "tooltip.cratetech.crate.contains_items": "Contains items (%s types, %s total)",
   "tooltip.cratetech.crate.configured_upgrades": "Configured upgrades preserved",
-  "tooltip.cratetech.crate.shulker_enabled": "Shulker upgrade installed",
+  "tooltip.cratetech.crate.shulker_enabled": "Shulker functionality enabled",
 
   "tooltip.cratetech.collector_upgrade.description": "Automatically collects nearby items",
   "tooltip.cratetech.hopper_upgrade.description": "Transfer items to/from adjacent inventories",
