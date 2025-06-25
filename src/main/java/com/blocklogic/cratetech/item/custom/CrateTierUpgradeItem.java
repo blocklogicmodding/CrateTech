@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CrateTierUpgradeItem extends Item {
@@ -59,17 +60,28 @@ public class CrateTierUpgradeItem extends Item {
             return InteractionResult.FAIL;
         }
 
-        NonNullList<ItemStack> items = NonNullList.withSize(crateEntity.getInventorySize(), ItemStack.EMPTY);
-        for (int i = 0; i < crateEntity.getInventorySize(); i++) {
-            items.set(i, crateEntity.getItemHandler().getStackInSlot(i));
+        int oldStorageSlots = getStorageSlotCount(fromSlots);
+        NonNullList<ItemStack> storageItems = NonNullList.withSize(oldStorageSlots, ItemStack.EMPTY);
+        for (int i = 0; i < oldStorageSlots; i++) {
+            storageItems.set(i, crateEntity.getItemHandler().getStackInSlot(i));
         }
 
+        ItemStack filterItem = crateEntity.getItemHandler().getStackInSlot(getFilterSlotIndex(fromSlots));
+        List<ItemStack> upgradeItems = new ArrayList<>();
+        int oldUpgradeStart = getUpgradeSlotStart(fromSlots);
+        for (int i = 0; i < 4; i++) {
+            upgradeItems.add(crateEntity.getItemHandler().getStackInSlot(oldUpgradeStart + i));
+        }
+
+        ItemStack pushFilter = crateEntity.getItemHandler().getStackInSlot(getPushFilterIndex(fromSlots));
+        ItemStack pullFilter = crateEntity.getItemHandler().getStackInSlot(getPullFilterIndex(fromSlots));
+
         CrateContents contents = CrateContents.fromCrate(
-                items,
+                storageItems,
                 crateEntity.getCollectorSettings(),
                 crateEntity.getHopperSettings(),
                 crateEntity.getCompactingSettings(),
-                crateEntity.getInventorySize()
+                oldStorageSlots
         );
 
         BlockState newState = targetBlock.defaultBlockState();
@@ -77,8 +89,27 @@ public class CrateTierUpgradeItem extends Item {
 
         BlockEntity newBlockEntity = level.getBlockEntity(pos);
         if (newBlockEntity instanceof BaseCrateBlockEntity newCrateEntity) {
-            for (int i = 0; i < Math.min(contents.items().size(), newCrateEntity.getInventorySize()); i++) {
+            int newStorageSlots = getStorageSlotCount(toSlots);
+            for (int i = 0; i < Math.min(contents.items().size(), newStorageSlots); i++) {
                 newCrateEntity.getItemHandler().setStackInSlot(i, contents.items().get(i));
+            }
+
+            if (!filterItem.isEmpty()) {
+                newCrateEntity.getItemHandler().setStackInSlot(getFilterSlotIndex(toSlots), filterItem);
+            }
+
+            int newUpgradeStart = getUpgradeSlotStart(toSlots);
+            for (int i = 0; i < Math.min(upgradeItems.size(), 4); i++) {
+                if (!upgradeItems.get(i).isEmpty()) {
+                    newCrateEntity.getItemHandler().setStackInSlot(newUpgradeStart + i, upgradeItems.get(i));
+                }
+            }
+
+            if (!pushFilter.isEmpty()) {
+                newCrateEntity.getItemHandler().setStackInSlot(getPushFilterIndex(toSlots), pushFilter);
+            }
+            if (!pullFilter.isEmpty()) {
+                newCrateEntity.getItemHandler().setStackInSlot(getPullFilterIndex(toSlots), pullFilter);
             }
 
             newCrateEntity.setCollectorSettings(contents.collectorSettings());
@@ -96,6 +127,46 @@ public class CrateTierUpgradeItem extends Item {
                 .withStyle(ChatFormatting.GREEN), true);
 
         return InteractionResult.CONSUME;
+    }
+
+    private int getStorageSlotCount(int totalSlots) {
+        if (totalSlots == 9) return 9;
+        if (totalSlots == 27) return 27;
+        if (totalSlots == 54) return 54;
+        if (totalSlots == 104) return 104;
+        return 0;
+    }
+
+    private int getFilterSlotIndex(int totalSlots) {
+        if (totalSlots == 9) return 9;
+        if (totalSlots == 27) return 27;
+        if (totalSlots == 54) return 54;
+        if (totalSlots == 104) return 104;
+        return 0;
+    }
+
+    private int getUpgradeSlotStart(int totalSlots) {
+        if (totalSlots == 9) return 10;
+        if (totalSlots == 27) return 28;
+        if (totalSlots == 54) return 55;
+        if (totalSlots == 104) return 105;
+        return 0;
+    }
+
+    private int getPushFilterIndex(int totalSlots) {
+        if (totalSlots == 9) return 14;
+        if (totalSlots == 27) return 32;
+        if (totalSlots == 54) return 59;
+        if (totalSlots == 104) return 109;
+        return 0;
+    }
+
+    private int getPullFilterIndex(int totalSlots) {
+        if (totalSlots == 9) return 15;
+        if (totalSlots == 27) return 33;
+        if (totalSlots == 54) return 60;
+        if (totalSlots == 104) return 110;
+        return 0;
     }
 
     private Block getTargetBlock(Block currentBlock) {
